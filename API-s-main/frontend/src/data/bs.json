@@ -1,0 +1,216 @@
+{
+  "products": [
+    {
+      "id": 1,
+      "name": "iPhone 14 Pro",
+      "description": "El iPhone más avanzado con chip A16 Bionic, sistema de cámaras Pro y pantalla Super Retina XDR de 6.1 pulgadas.",
+      "price": 999999,
+      "stock": 15,
+      "category": "electronicos",
+      "imageUrl": "https://images.unsplash.com/photo-1592750475338-74b7b21085ab?w=400&h=400&fit=crop"
+    },
+    {
+      "id": 2,
+      "name": "Samsung Galaxy S23 Ultra",
+      "description": "Smartphone premium con S Pen integrado, cámara de 200MP y pantalla Dynamic AMOLED 2X de 6.8 pulgadas.",
+      "price": 850000,
+      "stock": 12,
+      "category": "electronicos",
+      "imageUrl": "https://images.unsplash.com/photo-1610945265064-0e34e5519bbf?w=400&h=400&fit=crop"
+    },
+    {
+      "id": 3,
+      "name": "Auriculares Bluetooth Sony WH-1000XM5",
+      "description": "Auriculares inalámbricos con cancelación de ruido líder en la industria y hasta 30 horas de batería.",
+      "price": 45000,
+      "stock": 25,
+      "category": "electronicos",
+      "imageUrl": "https://images.unsplash.com/photo-1583394838336-acd977736f90?w=400&h=400&fit=crop"
+    },
+    {
+      "id": 4,
+      "name": "MacBook Air M2",
+      "description": "Laptop ultradelgada con chip M2 de Apple, pantalla Liquid Retina de 13.6 pulgadas y hasta 18 horas de batería.",
+      "price": 1200000,
+      "stock": 8,
+      "category": "electronicos",
+      "imageUrl": "https://images.unsplash.com/photo-1541807084-5c52b6b3adef?w=400&h=400&fit=crop"
+    },
+    {
+      "id": 5,
+      "name": "Camiseta Básica Algodón",
+      "description": "Camiseta 100% algodón, corte clásico, disponible en varios colores. Perfecta para uso diario.",
+      "price": 2500,
+      "stock": 50,
+      "category": "ropa",
+      "imageUrl": "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400&h=400&fit=crop"
+    },
+    {
+      "id": 6,
+      "name": "Jeans Slim Fit",
+      "description": "Jeans de mezclilla premium con corte slim fit, cómodos y duraderos. Talla 28-38.",
+      "price": 8500,
+      "stock": 30,
+      "category": "ropa",
+      "imageUrl": "https://images.unsplash.com/photo-1542272604-787c3835535d?w=400&h=400&fit=crop"
+    },
+    {
+      "id": 7,
+      "name": "Zapatillas Nike Air Max",
+      "description": "Zapatillas deportivas con tecnología Air Max, ideales para running y uso casual.",
+      "price": 12000,
+      "stock": 20,
+      "category": "deportes",
+      "imageUrl": "https://images.unsplash.com/photo-1549298916-b41d501d3772?w=400&h=400&fit=crop"
+    },
+    {
+      "id": 8,
+      "name": "Sofá Modular 3 Plazas",
+      "description": "Sofá modular tapizado en tela gris, cómodo y moderno. Perfecto para sala de estar.",
+      "price": 85000,
+      "stock": 5,
+      "category": "hogar",
+      "imageUrl": "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=400&h=400&fit=crop"
+    },
+    {
+      "id": 9,
+      "name": "Mesa de Centro Madera",
+      "description": "Mesa de centro de madera maciza con acabado natural. Diseño minimalista y funcional.",
+      "price": 25000,
+      "stock": 10,
+      "category": "hogar",
+      "imageUrl": "https://images.unsplash.com/photo-1506439773649-6e0eb8cfb237?w=400&h=400&fit=crop"
+    },
+    {
+      "id": 10,
+      "name": "El Principito",
+      "description": "Clásico de la literatura universal por Antoine de Saint-Exupéry. Edición ilustrada.",
+      "price": 1800,
+      "stock": 40,
+      "category": "libros",
+      "imageUrl": "https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=400&h=400&fit=crop"
+    },
+    {
+      "id": 11,
+      "name": "Cien Años de Soledad",
+      "description": "Obra maestra de Gabriel García Márquez. Premio Nobel de Literatura.",
+      "price": 2200,
+      "stock": 35,
+      "category": "libros",
+      "imageUrl": "https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=400&h=400&fit=crop"
+    },
+    {
+      "id": 12,
+      "name": "Set de Maquillaje Profesional",
+      "description": "Kit completo de maquillaje con paleta de sombras, labiales, base y pinceles profesionales.",
+      "price": 15000,
+      "stock": 18,
+      "category": "belleza",
+      "imageUrl": "https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?w=400&h=400&fit=crop"
+    },
+    {
+      "id": 13,
+      "name": "Crema Facial Hidratante",
+      "description": "Crema facial con ácido hialurónico y vitamina E. Para todo tipo de piel.",
+      "price": 3500,
+      "stock": 45,
+      "category": "belleza",
+      "imageUrl": "https://images.unsplash.com/photo-1556228720-195a672e8a03?w=400&h=400&fit=crop"
+    },
+    {
+      "id": 14,
+      "name": "Bicicleta Montaña 21 Velocidades",
+      "description": "Bicicleta de montaña con marco de aluminio, 21 velocidades Shimano y frenos de disco.",
+      "price": 45000,
+      "stock": 7,
+      "category": "deportes",
+      "imageUrl": "https://images.unsplash.com/photo-1544191696-15693072e0e5?w=400&h=400&fit=crop"
+    },
+    {
+      "id": 15,
+      "name": "Pelota de Fútbol FIFA",
+      "description": "Pelota oficial FIFA, tamaño 5, perfecta para partidos profesionales y amateur.",
+      "price": 4500,
+      "stock": 25,
+      "category": "deportes",
+      "imageUrl": "https://images.unsplash.com/photo-1614632537190-23e4146777db?w=400&h=400&fit=crop"
+    },
+    {
+      "id": 16,
+      "name": "Lámpara de Escritorio LED",
+      "description": "Lámpara LED regulable con brazo articulado y base estable. Ideal para oficina o estudio.",
+      "price": 6500,
+      "stock": 22,
+      "category": "hogar",
+      "imageUrl": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop"
+    },
+    {
+      "id": 17,
+      "name": "Tablet Samsung Galaxy Tab S8",
+      "description": "Tablet Android de 11 pulgadas con S Pen incluido, ideal para trabajo y entretenimiento.",
+      "price": 65000,
+      "stock": 14,
+      "category": "electronicos",
+      "imageUrl": "https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0?w=400&h=400&fit=crop"
+    },
+    {
+      "id": 18,
+      "name": "Chaqueta de Cuero",
+      "description": "Chaqueta de cuero genuino, estilo clásico, forrada internamente. Disponible en negro y marrón.",
+      "price": 35000,
+      "stock": 12,
+      "category": "ropa",
+      "imageUrl": "https://images.unsplash.com/photo-1551028719-00167b16eac5?w=400&h=400&fit=crop"
+    },
+    {
+      "id": 19,
+      "name": "Perfume Unisex 100ml",
+      "description": "Fragancia fresca y duradera con notas cítricas y amaderadas. Presentación elegante.",
+      "price": 8500,
+      "stock": 28,
+      "category": "belleza",
+      "imageUrl": "https://images.unsplash.com/photo-1541643600914-78b084683601?w=400&h=400&fit=crop"
+    },
+    {
+      "id": 20,
+      "name": "Libro de Cocina Mediterránea",
+      "description": "Recetas tradicionales de la cocina mediterránea con ingredientes frescos y saludables.",
+      "price": 2800,
+      "stock": 32,
+      "category": "libros",
+      "imageUrl": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop"
+    }
+  ],
+  "categories": [
+    {
+      "id": "electronicos",
+      "name": "Electrónicos",
+      "description": "Smartphones, laptops, tablets y accesorios tecnológicos"
+    },
+    {
+      "id": "ropa",
+      "name": "Ropa",
+      "description": "Vestimenta para hombre y mujer de todas las edades"
+    },
+    {
+      "id": "hogar",
+      "name": "Hogar",
+      "description": "Muebles, decoración y artículos para el hogar"
+    },
+    {
+      "id": "deportes",
+      "name": "Deportes",
+      "description": "Equipamiento deportivo y artículos para fitness"
+    },
+    {
+      "id": "libros",
+      "name": "Libros",
+      "description": "Literatura, educación y entretenimiento"
+    },
+    {
+      "id": "belleza",
+      "name": "Belleza",
+      "description": "Cosméticos, cuidado personal y fragancias"
+    }
+  ]
+}
