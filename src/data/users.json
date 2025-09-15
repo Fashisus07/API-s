@@ -1,0 +1,59 @@
+{
+  "users": [
+    {
+      "id": 1,
+      "username": "admin",
+      "email": "admin@ecommerce.com",
+      "password": "admin123",
+      "firstName": "Administrador",
+      "lastName": "Sistema",
+      "role": "admin",
+      "createdAt": "2024-01-01T00:00:00.000Z",
+      "isActive": true
+    },
+    {
+      "id": 2,
+      "username": "usuario1",
+      "email": "usuario1@email.com",
+      "password": "password123",
+      "firstName": "Juan",
+      "lastName": "Pérez",
+      "role": "user",
+      "createdAt": "2024-01-15T10:30:00.000Z",
+      "isActive": true
+    },
+    {
+      "id": 3,
+      "username": "maria.garcia",
+      "email": "maria.garcia@email.com",
+      "password": "maria2024",
+      "firstName": "María",
+      "lastName": "García",
+      "role": "user",
+      "createdAt": "2024-02-01T14:20:00.000Z",
+      "isActive": true
+    },
+    {
+      "id": 4,
+      "username": "carlos.lopez",
+      "email": "carlos.lopez@email.com",
+      "password": "carlos456",
+      "firstName": "Carlos",
+      "lastName": "López",
+      "role": "user",
+      "createdAt": "2024-02-10T09:15:00.000Z",
+      "isActive": true
+    },
+    {
+      "id": 5,
+      "username": "ana.martinez",
+      "email": "ana.martinez@email.com",
+      "password": "ana789",
+      "firstName": "Ana",
+      "lastName": "Martínez",
+      "role": "user",
+      "createdAt": "2024-02-20T16:45:00.000Z",
+      "isActive": true
+    }
+  ]
+}

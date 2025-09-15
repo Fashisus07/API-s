@@ -1,0 +1,292 @@
+import React, { useState, useEffect } from "react";
+import { useLocation, useSearchParams, Link } from "react-router-dom";
+import ProductCard from "../components/ProductCard";
+import SearchBar from "../components/SearchBar";
+import productsData from "../data/bs.json";
+
+function Productos() {
+  const [products, setProducts] = useState([]);
+  const [allProducts, setAllProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [refreshing, setRefreshing] = useState(false);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const location = useLocation();
+
+  const fetchProducts = (isRefresh = false) => {
+    if (isRefresh) {
+      setRefreshing(true);
+    } else {
+      setLoading(true);
+    }
+
+    try {
+      console.log("Datos importados:", productsData);
+      console.log("Productos:", productsData.products);
+
+      if (productsData && productsData.products) {
+        setAllProducts(productsData.products);
+        filterProducts(productsData.products);
+        setError("");
+      } else {
+        throw new Error("No se encontraron productos en los datos");
+      }
+    } catch (err) {
+      console.error("Error detallado:", err);
+      setError(`Error al cargar productos: ${err.message}`);
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  };
+
+  const filterProducts = (productList = allProducts) => {
+    const searchTerm = searchParams.get('search')?.toLowerCase() || '';
+    const category = searchParams.get('category')?.toLowerCase() || '';
+
+    let filtered = productList;
+
+    // Filtrar por búsqueda
+    if (searchTerm) {
+      filtered = filtered.filter(product =>
+        product.name.toLowerCase().includes(searchTerm) ||
+        product.description.toLowerCase().includes(searchTerm) ||
+        product.category.toLowerCase().includes(searchTerm)
+      );
+    }
+
+    // Filtrar por categoría
+    if (category) {
+      filtered = filtered.filter(product =>
+        product.category.toLowerCase() === category
+      );
+    }
+
+    setProducts(filtered);
+  };
+
+  useEffect(() => {
+    console.log("useEffect ejecutándose...");
+    console.log("productsData disponible:", productsData);
+
+    // Cargar datos del JSON principal
+    let allProductsList = [];
+    if (productsData && productsData.products && productsData.products.length > 0) {
+      allProductsList = [...productsData.products];
+    }
+
+    // Verificar si hay productos adicionales en localStorage (productos publicados por usuarios)
+    try {
+      const userProducts = JSON.parse(localStorage.getItem('userProducts') || '[]');
+      if (userProducts.length > 0) {
+        // Solo incluir productos activos en la lista general
+        const activeUserProducts = userProducts.filter(p => p.status === 'active');
+        // Combinar productos del JSON con productos de usuarios, evitando duplicados
+        const existingIds = allProductsList.map(p => p.id);
+        const newProducts = activeUserProducts.filter(p => !existingIds.includes(p.id));
+        allProductsList = [...allProductsList, ...newProducts];
+      }
+      
+      // También verificar allProductsData por compatibilidad
+      const savedProductsData = localStorage.getItem('allProductsData');
+      if (savedProductsData) {
+        const parsedData = JSON.parse(savedProductsData);
+        if (parsedData.products) {
+          const existingIds = allProductsList.map(p => p.id);
+          const newProducts = parsedData.products.filter(p => !existingIds.includes(p.id));
+          allProductsList = [...allProductsList, ...newProducts];
+        }
+      }
+    } catch (error) {
+      console.log("Error cargando productos adicionales:", error);
+    }
+
+    if (allProductsList.length > 0) {
+      setAllProducts(allProductsList);
+      setProducts(allProductsList);
+      setLoading(false);
+      setError("");
+      console.log("Productos cargados:", allProductsList.length);
+    } else {
+      setError("No se encontraron productos");
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (allProducts.length > 0) {
+      filterProducts();
+    }
+  }, [searchParams, allProducts]);
+
+  const handleSearch = (searchTerm) => {
+    if (searchTerm.trim()) {
+      setSearchParams({ search: searchTerm });
+    } else {
+      setSearchParams({});
+    }
+  };
+
+  const clearFilters = () => {
+    setSearchParams({});
+  };
+
+  const categories = [
+    { name: "Todos", value: "" },
+    { name: "Electrónicos", value: "electronicos" },
+    { name: "Ropa", value: "ropa" },
+    { name: "Hogar", value: "hogar" },
+    { name: "Deportes", value: "deportes" },
+    { name: "Libros", value: "libros" },
+    { name: "Belleza", value: "belleza" }
+  ];
+
+  const handleCategoryFilter = (categoryValue) => {
+    if (categoryValue) {
+      setSearchParams({ category: categoryValue });
+    } else {
+      setSearchParams({});
+    }
+  };
+
+  const currentCategory = searchParams.get('category') || '';
+  const currentSearch = searchParams.get('search') || '';
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      <div className="max-w-7xl mx-auto px-4 py-8">
+        {/* Header */}
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-gray-800 mb-4">Productos</h1>
+
+          {/* Search Bar */}
+          <div className="mb-6">
+            <SearchBar onSearch={handleSearch} initialValue={currentSearch} />
+          </div>
+
+          {/* Category Filters */}
+          <div className="flex flex-wrap gap-2 mb-6">
+            {categories.map((category) => (
+              <button
+                key={category.value}
+                onClick={() => handleCategoryFilter(category.value)}
+                className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+                  currentCategory === category.value
+                    ? 'bg-blue-600 text-white'
+                    : 'bg-white text-gray-700 hover:bg-blue-50 border border-gray-300'
+                }`}
+              >
+                {category.name}
+              </button>
+            ))}
+          </div>
+
+          {/* Active Filters */}
+          {(currentSearch || currentCategory) && (
+            <div className="flex items-center gap-4 mb-6 p-4 bg-blue-50 rounded-lg">
+              <span className="text-sm font-medium text-gray-700">Filtros activos:</span>
+              {currentSearch && (
+                <span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm">
+                  Búsqueda: &quot;{currentSearch}&quot;
+                </span>
+              )}
+              {currentCategory && (
+                <span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm">
+                  Categoría: {categories.find(c => c.value === currentCategory)?.name}
+                </span>
+              )}
+              <button
+                onClick={clearFilters}
+                className="text-blue-600 hover:text-blue-800 text-sm font-medium"
+              >
+                Limpiar filtros
+              </button>
+            </div>
+          )}
+        </div>
+
+        {/* Refresh Button */}
+        <div className="mb-6">
+          <button
+            onClick={() => fetchProducts(true)}
+            disabled={refreshing}
+            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors"
+          >
+            {refreshing ? "Actualizando..." : "🔄 Actualizar productos"}
+          </button>
+        </div>
+
+        {/* Error Message */}
+        {error && (
+          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6">
+            {error}
+          </div>
+        )}
+
+        {/* Products Grid */}
+        {loading ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {[...Array(8)].map((_, i) => (
+              <div key={i} className="bg-gray-200 rounded-lg h-80 animate-pulse"></div>
+            ))}
+          </div>
+        ) : products.length > 0 ? (
+          <>
+            <div className="mb-4">
+              <p className="text-gray-600">
+                Mostrando {products.length} producto{products.length !== 1 ? 's' : ''}
+                {currentSearch && ` para "${currentSearch}"`}
+                {currentCategory && ` en ${categories.find(c => c.value === currentCategory)?.name}`}
+              </p>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {products.map((product) => (
+                <div key={product.id} className="relative">
+                  <ProductCard product={product} />
+                  <Link
+                    to={`/producto/${product.id}`}
+                    className="absolute inset-0 z-10"
+                    aria-label={`Ver detalles de ${product.name}`}
+                  />
+                </div>
+              ))}
+            </div>
+          </>
+        ) : (
+          <div className="text-center py-16">
+            <div className="text-6xl mb-4">🔍</div>
+            <h3 className="text-xl font-semibold text-gray-600 mb-2">
+              No se encontraron productos
+            </h3>
+            <p className="text-gray-500 mb-6">
+              {currentSearch || currentCategory
+                ? "Intenta ajustar tus filtros de búsqueda"
+                : "Aún no hay productos disponibles"
+              }
+            </p>
+            {(currentSearch || currentCategory) && (
+              <button
+                onClick={clearFilters}
+                className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                Ver todos los productos
+              </button>
+            )}
+          </div>
+        )}
+
+        {/* Back to Home */}
+        <div className="mt-12 text-center">
+          <Link
+            to="/"
+            className="inline-flex items-center text-blue-600 hover:text-blue-800 font-medium"
+          >
+            ← Volver al inicio
+          </Link>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default Productos;
