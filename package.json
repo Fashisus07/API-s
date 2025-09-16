@@ -1,0 +1,19 @@
+{
+  "name": "api-s",
+  "version": "1.0.0",
+  "description": "Proyecto E-Commerce full-stack con React, Spring Boot y PostgreSQL, orquestado con Docker Compose.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Fashisus07/API-s.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Fashisus07/API-s/issues"
+  },
+  "homepage": "https://github.com/Fashisus07/API-s#readme"
+}

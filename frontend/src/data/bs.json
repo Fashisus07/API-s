@@ -4,181 +4,181 @@
       "id": 1,
       "name": "iPhone 14 Pro",
       "description": "El iPhone más avanzado con chip A16 Bionic, sistema de cámaras Pro y pantalla Super Retina XDR de 6.1 pulgadas.",
-      "price": 999999,
+      "price": 1199.99,
       "stock": 15,
       "category": "electronicos",
-      "imageUrl": "https://picsum.photos/300/200?random=1"
+      "imageUrl": "https://store.storeimages.cdn-apple.com/8756/as-images.apple.com/is/iphone-14-pro-model-unselect-gallery-2-202209?wid=2560&hei=1440&fmt=p-jpg&qlt=80&.v=1660753617539"
     },
     {
       "id": 2,
       "name": "Samsung Galaxy S23 Ultra",
       "description": "Smartphone premium con S Pen integrado, cámara de 200MP y pantalla Dynamic AMOLED 2X de 6.8 pulgadas.",
-      "price": 850000,
+      "price": 1099.99,
       "stock": 12,
       "category": "electronicos",
-      "imageUrl": "https://picsum.photos/300/200?random=2"
+      "imageUrl": "https://images.samsung.com/is/image/samsung/p6pim/es/2302/gallery/es-galaxy-s23-s918-sm-s918bliheub-534729287?$684_547_PNG$"
     },
     {
       "id": 3,
       "name": "Auriculares Bluetooth Sony WH-1000XM5",
       "description": "Auriculares inalámbricos con cancelación de ruido líder en la industria y hasta 30 horas de batería.",
-      "price": 45000,
+      "price": 349.99,
       "stock": 25,
       "category": "electronicos",
-      "imageUrl": "https://picsum.photos/300/200?random=3"
+      "imageUrl": "https://m.media-amazon.com/images/I/71GMFf-4cwL._AC_SL1500_.jpg"
     },
     {
       "id": 4,
       "name": "MacBook Air M2",
       "description": "Laptop ultradelgada con chip M2 de Apple, pantalla Liquid Retina de 13.6 pulgadas y hasta 18 horas de batería.",
-      "price": 1200000,
+      "price": 1299.99,
       "stock": 8,
       "category": "electronicos",
-      "imageUrl": "https://picsum.photos/300/200?random=4"
+      "imageUrl": "https://http2.mlstatic.com/D_NQ_NP_635822-MLU77344390787_062024-O.webp"
     },
     {
       "id": 5,
       "name": "Camiseta Básica Algodón",
       "description": "Camiseta 100% algodón, corte clásico, disponible en varios colores. Perfecta para uso diario.",
-      "price": 2500,
+      "price": 19.99,
       "stock": 50,
       "category": "ropa",
-      "imageUrl": "https://picsum.photos/300/200?random=5"
+      "imageUrl": "https://naisa.es/11242-large_default/camiseta-basica-algodon-atomic-.jpg"
     },
     {
       "id": 6,
       "name": "Jeans Slim Fit",
       "description": "Jeans de mezclilla premium con corte slim fit, cómodos y duraderos. Talla 28-38.",
-      "price": 8500,
+      "price": 59.99,
       "stock": 30,
       "category": "ropa",
-      "imageUrl": "https://picsum.photos/300/200?random=6"
+      "imageUrl": "https://m.media-amazon.com/images/I/61mwIgyp2BL._UY1000_.jpg"
     },
     {
       "id": 7,
       "name": "Zapatillas Nike Air Max",
       "description": "Zapatillas deportivas con tecnología Air Max, ideales para running y uso casual.",
-      "price": 12000,
+      "price": 129.99,
       "stock": 20,
       "category": "deportes",
-      "imageUrl": "https://picsum.photos/300/200?random=7"
+      "imageUrl": "https://static.nike.com/a/images/t_PDP_1728_v1/f_auto,q_auto:eco/b7d9211c-26e7-431a-ac24-b0540fb3c00f/air-force-1-07-zapatillas-GjGXSP.png"
     },
     {
       "id": 8,
       "name": "Sofá Modular 3 Plazas",
       "description": "Sofá modular tapizado en tela gris, cómodo y moderno. Perfecto para sala de estar.",
-      "price": 85000,
+      "price": 899.99,
       "stock": 5,
       "category": "hogar",
-      "imageUrl": "https://picsum.photos/300/200?random=8"
+      "imageUrl": "https://assets.boconcept.com/3d15755e-84f4-4ea4-8c8e-b1a2004e701e/2734298_PNG-Web%2072dpi.png?format=webply&fit=bounds&width=3020&quality=75"
     },
     {
       "id": 9,
       "name": "Mesa de Centro Madera",
       "description": "Mesa de centro de madera maciza con acabado natural. Diseño minimalista y funcional.",
-      "price": 25000,
+      "price": 199.99,
       "stock": 10,
       "category": "hogar",
-      "imageUrl": "https://picsum.photos/300/200?random=9"
+      "imageUrl": "https://mueblesysillones.com.ar/wp-content/uploads/2023/12/mesa-de-centro-montana-lapacho.jpg"
     },
     {
       "id": 10,
       "name": "El Principito",
       "description": "Clásico de la literatura universal por Antoine de Saint-Exupéry. Edición ilustrada.",
-      "price": 1800,
+      "price": 14.99,
       "stock": 40,
       "category": "libros",
-      "imageUrl": "https://picsum.photos/300/200?random=10"
+      "imageUrl": "https://imagessl4.casadellibro.com/a/l/t5/44/9788498387544.jpg"
     },
     {
       "id": 11,
       "name": "Cien Años de Soledad",
       "description": "Obra maestra de Gabriel García Márquez. Premio Nobel de Literatura.",
-      "price": 2200,
+      "price": 18.99,
       "stock": 35,
       "category": "libros",
-      "imageUrl": "https://picsum.photos/300/200?random=11"
+      "imageUrl": "https://www.edicontinente.com.ar/image/titulos/9788466379717.jpg"
     },
     {
       "id": 12,
       "name": "Set de Maquillaje Profesional",
       "description": "Kit completo de maquillaje con paleta de sombras, labiales, base y pinceles profesionales.",
-      "price": 15000,
+      "price": 89.99,
       "stock": 18,
       "category": "belleza",
-      "imageUrl": "https://picsum.photos/300/200?random=12"
+      "imageUrl": "https://m.media-amazon.com/images/I/716EH6M3eTL._SL1500_.jpg"
     },
     {
       "id": 13,
       "name": "Crema Facial Hidratante",
       "description": "Crema facial con ácido hialurónico y vitamina E. Para todo tipo de piel.",
-      "price": 3500,
+      "price": 24.99,
       "stock": 45,
       "category": "belleza",
-      "imageUrl": "https://picsum.photos/300/200?random=13"
+      "imageUrl": "https://www.dermaglos.com/portals/0/Images/ecommerce/webp/7793742007897.webp"
     },
     {
       "id": 14,
       "name": "Bicicleta Montaña 21 Velocidades",
       "description": "Bicicleta de montaña con marco de aluminio, 21 velocidades Shimano y frenos de disco.",
-      "price": 45000,
+      "price": 449.99,
       "stock": 7,
       "category": "deportes",
-      "imageUrl": "https://picsum.photos/300/200?random=14"
+      "imageUrl": "https://http2.mlstatic.com/D_NQ_NP_793761-MLA83800038241_042025-O.webp"
     },
     {
       "id": 15,
       "name": "Pelota de Fútbol FIFA",
       "description": "Pelota oficial FIFA, tamaño 5, perfecta para partidos profesionales y amateur.",
-      "price": 4500,
+      "price": 39.99,
       "stock": 25,
       "category": "deportes",
-      "imageUrl": "https://picsum.photos/300/200?random=15"
+      "imageUrl": "https://puntodeportivoar.vtexassets.com/arquivos/ids/519689-800-auto?v=638811143495000000&width=800&height=auto&aspect=true"
     },
     {
       "id": 16,
       "name": "Lámpara de Escritorio LED",
       "description": "Lámpara LED regulable con brazo articulado y base estable. Ideal para oficina o estudio.",
-      "price": 6500,
+      "price": 49.99,
       "stock": 22,
       "category": "hogar",
-      "imageUrl": "https://picsum.photos/300/200?random=16"
+      "imageUrl": "https://www.iluminacioncenter.com.ar/img/productos/fichas/289-ilumcenter-lampara-de-escritorio-velador-bonnie-led-75w-dimerizable-20231018201028_102024.jpg"
     },
     {
       "id": 17,
       "name": "Tablet Samsung Galaxy Tab S8",
       "description": "Tablet Android de 11 pulgadas con S Pen incluido, ideal para trabajo y entretenimiento.",
-      "price": 65000,
+      "price": 699.99,
       "stock": 14,
       "category": "electronicos",
-      "imageUrl": "https://picsum.photos/300/200?random=17"
+      "imageUrl": "https://stylewatch.vtexassets.com/arquivos/ids/238347/tablet_samsung_SMX700NZALARO_04.jpg?v=638289388629000000"
     },
     {
       "id": 18,
       "name": "Chaqueta de Cuero",
       "description": "Chaqueta de cuero genuino, estilo clásico, forrada internamente. Disponible en negro y marrón.",
-      "price": 35000,
+      "price": 299.99,
       "stock": 12,
       "category": "ropa",
-      "imageUrl": "https://picsum.photos/300/200?random=18"
+      "imageUrl": "https://m.media-amazon.com/images/I/91JFZBDAZxL._AC_SL1500_.jpg"
     },
     {
       "id": 19,
       "name": "Perfume Unisex 100ml",
       "description": "Fragancia fresca y duradera con notas cítricas y amaderadas. Presentación elegante.",
-      "price": 8500,
+      "price": 69.99,
       "stock": 28,
       "category": "belleza",
-      "imageUrl": "https://picsum.photos/300/200?random=19"
+      "imageUrl": "https://http2.mlstatic.com/D_NQ_NP_641666-MLU78282009697_082024-O.webp"
     },
     {
       "id": 20,
       "name": "Libro de Cocina Mediterránea",
       "description": "Recetas tradicionales de la cocina mediterránea con ingredientes frescos y saludables.",
-      "price": 2800,
+      "price": 22.99,
       "stock": 32,
       "category": "libros",
-      "imageUrl": "https://picsum.photos/300/200?random=20"
+      "imageUrl": "https://images.cdn3.buscalibre.com/fit-in/360x360/0b/d8/0bd80d2b173ebe441e305aae9283c86f.jpg"
     }
   ],
   "categories": [
