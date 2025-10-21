@@ -1,0 +1,8 @@
+{
+  "name": "Producto de Prueba",
+  "description": "Esta es una descripción de prueba para el producto que debe tener al menos 10 caracteres",
+  "price": 29.99,
+  "stock": 10,
+  "category": "electronicos",
+  "imageUrl": "https://picsum.photos/300/200?random=100"
+}

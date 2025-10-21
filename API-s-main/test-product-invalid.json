@@ -1,0 +1,8 @@
+{
+  "name": "A",
+  "description": "Corto",
+  "price": -10,
+  "stock": -5,
+  "category": "",
+  "imageUrl": "invalid-url"
+}
