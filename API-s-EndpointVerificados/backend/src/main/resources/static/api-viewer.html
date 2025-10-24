@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Viewer - E-Commerce</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 2rem;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 350px 1fr;
+            gap: 2rem;
+            height: calc(100vh - 4rem);
+        }
+        .sidebar {
+            background: white;
+            border-radius: 15px;
+            padding: 2rem;
+            overflow-y: auto;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+        }
+        .sidebar h1 {
+            font-size: 1.5rem;
+            color: #667eea;
+            margin-bottom: 1.5rem;
+        }
+        .endpoint-group {
+            margin-bottom: 2rem;
+        }
+        .endpoint-group h3 {
+            font-size: 0.9rem;
+            color: #999;
+            text-transform: uppercase;
+            margin-bottom: 0.8rem;
+            font-weight: 600;
+        }
+        .endpoint-item {
+            display: flex;
+            align-items: center;
+            padding: 0.8rem;
+            margin-bottom: 0.5rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 2px solid transparent;
+        }
+        .endpoint-item:hover {
+            background: #f8f9fa;
+            transform: translateX(5px);
+        }
+        .endpoint-item.active {
+            background: #e8eeff;
+            border-color: #667eea;
+        }
+        .method-badge {
+            padding: 0.3rem 0.6rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            margin-right: 0.8rem;
+            min-width: 50px;
+            text-align: center;
+            color: white;
+        }
+        .method-badge.get { background: #3b82f6; }
+        .method-badge.post { background: #10b981; }
+        .method-badge.put { background: #f59e0b; }
+        .method-badge.delete { background: #ef4444; }
+        .endpoint-path {
+            font-size: 0.85rem;
+            color: #333;
+            font-family: 'Courier New', monospace;
+        }
+        .main-content {
+            background: white;
+            border-radius: 15px;
+            padding: 2rem;
+            overflow-y: auto;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+        }
+        .content-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid #e5e7eb;
+        }
+        .content-header h2 {
+            color: #333;
+            font-size: 1.8rem;
+        }
+        .try-button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+        .try-button:hover {
+            background: #764ba2;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+        .try-button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .response-section {
+            margin-top: 2rem;
+        }
+        .response-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        .response-header h3 {
+            color: #555;
+            font-size: 1.2rem;
+        }
+        .copy-button {
+            background: #10b981;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: all 0.2s;
+        }
+        .copy-button:hover {
+            background: #059669;
+        }
+        .json-viewer {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 1.5rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            line-height: 1.6;
+            max-height: 600px;
+            overflow-y: auto;
+        }
+        .loading {
+            text-align: center;
+            padding: 3rem;
+            color: #999;
+        }
+        .error {
+            background: #fee;
+            color: #c33;
+            padding: 1rem;
+            border-radius: 8px;
+            border-left: 4px solid #c33;
+        }
+        .status-badge {
+            display: inline-block;
+            padding: 0.3rem 0.8rem;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-left: 1rem;
+        }
+        .status-200 { background: #d1fae5; color: #065f46; }
+        .status-error { background: #fee; color: #c33; }
+        .welcome {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: #999;
+        }
+        .welcome h2 {
+            color: #667eea;
+            margin-bottom: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="sidebar">
+            <h1>🚀 API E-Commerce</h1>
+            
+            <div class="endpoint-group">
+                <h3>Autenticación</h3>
+                <div class="endpoint-item" data-method="POST" data-path="/api/auth/register">
+                    <span class="method-badge post">POST</span>
+                    <span class="endpoint-path">/api/auth/register</span>
+                </div>
+                <div class="endpoint-item" data-method="POST" data-path="/api/auth/login">
+                    <span class="method-badge post">POST</span>
+                    <span class="endpoint-path">/api/auth/login</span>
+                </div>
+            </div>
+
+            <div class="endpoint-group">
+                <h3>Productos</h3>
+                <div class="endpoint-item" data-method="GET" data-path="/api/products">
+                    <span class="method-badge get">GET</span>
+                    <span class="endpoint-path">/api/products</span>
+                </div>
+                <div class="endpoint-item" data-method="GET" data-path="/api/products/1">
+                    <span class="method-badge get">GET</span>
+                    <span class="endpoint-path">/api/products/1</span>
+                </div>
+                <div class="endpoint-item" data-method="GET" data-path="/api/products/2">
+                    <span class="method-badge get">GET</span>
+                    <span class="endpoint-path">/api/products/2</span>
+                </div>
+                <div class="endpoint-item" data-method="GET" data-path="/api/products/3">
+                    <span class="method-badge get">GET</span>
+                    <span class="endpoint-path">/api/products/3</span>
+                </div>
+            </div>
+
+            <div class="endpoint-group">
+                <h3>Categorías</h3>
+                <div class="endpoint-item" data-method="GET" data-path="/api/categories">
+                    <span class="method-badge get">GET</span>
+                    <span class="endpoint-path">/api/categories</span>
+                </div>
+                <div id="categories-list">
+                    <!-- Las categorías se cargarán dinámicamente aquí -->
+                </div>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div id="content">
+                <div class="welcome">
+                    <h2>👋 Bienvenido al API Viewer</h2>
+                    <p>Selecciona un endpoint de la izquierda para ver la respuesta</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentEndpoint = null;
+
+        // Cargar categorías al inicio
+        async function loadCategories() {
+            try {
+                const response = await fetch('http://localhost:8080/api/categories');
+                const categories = await response.json();
+                
+                const categoriesList = document.getElementById('categories-list');
+                categoriesList.innerHTML = '';
+                
+                categories.forEach(category => {
+                    const div = document.createElement('div');
+                    div.className = 'endpoint-item';
+                    div.dataset.method = 'GET';
+                    div.dataset.path = `/api/categories/${category.id}`;
+                    div.innerHTML = `
+                        <span class="method-badge get">GET</span>
+                        <span class="endpoint-path">/api/categories/${category.id} (${category.name})</span>
+                    `;
+                    categoriesList.appendChild(div);
+                    
+                    // Agregar event listener al nuevo elemento
+                    div.addEventListener('click', async () => {
+                        document.querySelectorAll('.endpoint-item').forEach(i => i.classList.remove('active'));
+                        div.classList.add('active');
+                        currentEndpoint = { method: 'GET', path: `/api/categories/${category.id}` };
+                        await loadEndpoint('GET', `/api/categories/${category.id}`);
+                    });
+                });
+            } catch (error) {
+                console.error('Error al cargar categorías:', error);
+                // Si falla, mostrar categorías por defecto
+                const categoriesList = document.getElementById('categories-list');
+                categoriesList.innerHTML = `
+                    <div class="endpoint-item" data-method="GET" data-path="/api/categories/1">
+                        <span class="method-badge get">GET</span>
+                        <span class="endpoint-path">/api/categories/1</span>
+                    </div>
+                `;
+            }
+        }
+
+        // Cargar categorías cuando se carga la página
+        window.addEventListener('DOMContentLoaded', loadCategories);
+
+        document.querySelectorAll('.endpoint-item').forEach(item => {
+            item.addEventListener('click', async () => {
+                // Remove active class from all items
+                document.querySelectorAll('.endpoint-item').forEach(i => i.classList.remove('active'));
+                item.classList.add('active');
+
+                const method = item.dataset.method;
+                const path = item.dataset.path;
+                currentEndpoint = { method, path };
+
+                await loadEndpoint(method, path);
+            });
+        });
+
+        async function loadEndpoint(method, path) {
+            const content = document.getElementById('content');
+            
+            content.innerHTML = `
+                <div class="content-header">
+                    <div>
+                        <h2>${method} ${path}</h2>
+                    </div>
+                    <button class="try-button" onclick="executeRequest()">▶ Ejecutar</button>
+                </div>
+                <div class="response-section">
+                    <div class="response-header">
+                        <h3>Respuesta</h3>
+                    </div>
+                    <div class="loading">Haz clic en "Ejecutar" para ver la respuesta</div>
+                </div>
+            `;
+        }
+
+        async function executeRequest() {
+            if (!currentEndpoint) return;
+
+            const { method, path } = currentEndpoint;
+            const responseSection = document.querySelector('.response-section');
+            
+            responseSection.innerHTML = `
+                <div class="response-header">
+                    <h3>Respuesta</h3>
+                </div>
+                <div class="loading">⏳ Cargando...</div>
+            `;
+
+            try {
+                const response = await fetch(`http://localhost:8080${path}`, {
+                    method: method,
+                    headers: {
+                        'Accept': 'application/json',
+                    }
+                });
+
+                const data = await response.json();
+                const statusClass = response.ok ? 'status-200' : 'status-error';
+                
+                responseSection.innerHTML = `
+                    <div class="response-header">
+                        <div>
+                            <h3>Respuesta <span class="status-badge ${statusClass}">Status: ${response.status}</span></h3>
+                        </div>
+                        <button class="copy-button" onclick="copyResponse()">📋 Copiar</button>
+                    </div>
+                    <div class="json-viewer" id="json-response">${syntaxHighlight(JSON.stringify(data, null, 2))}</div>
+                `;
+            } catch (error) {
+                responseSection.innerHTML = `
+                    <div class="response-header">
+                        <h3>Error</h3>
+                    </div>
+                    <div class="error">
+                        <strong>Error al ejecutar la petición:</strong><br>
+                        ${error.message}
+                    </div>
+                `;
+            }
+        }
+
+        function syntaxHighlight(json) {
+            json = json.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            return json.replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g, function (match) {
+                let cls = 'number';
+                if (/^"/.test(match)) {
+                    if (/:$/.test(match)) {
+                        cls = 'key';
+                        return '<span style="color: #9cdcfe;">' + match + '</span>';
+                    } else {
+                        cls = 'string';
+                        return '<span style="color: #ce9178;">' + match + '</span>';
+                    }
+                } else if (/true|false/.test(match)) {
+                    cls = 'boolean';
+                    return '<span style="color: #569cd6;">' + match + '</span>';
+                } else if (/null/.test(match)) {
+                    cls = 'null';
+                    return '<span style="color: #569cd6;">' + match + '</span>';
+                }
+                return '<span style="color: #b5cea8;">' + match + '</span>';
+            });
+        }
+
+        function copyResponse() {
+            const jsonElement = document.getElementById('json-response');
+            const text = jsonElement.textContent;
+            navigator.clipboard.writeText(text).then(() => {
+                const btn = document.querySelector('.copy-button');
+                const originalText = btn.textContent;
+                btn.textContent = '✓ Copiado!';
+                setTimeout(() => {
+                    btn.textContent = originalText;
+                }, 2000);
+            });
+        }
+    </script>
+</body>
+</html>
