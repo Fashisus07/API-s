@@ -3,43 +3,48 @@ import React, { useState, useEffect } from "react";
 import { useLocation, useSearchParams, Link } from "react-router-dom"; // Hooks para ubicación y parámetros de búsqueda
 import ProductCard from "../components/ProductCard"; // Componente de tarjeta de producto
 import SearchBar from "../components/SearchBar"; // Componente de barra de búsqueda
-import productsData from "../data/bs.json"; // Datos de productos desde archivo JSON
+import { getProducts, getCategories } from "../services/apiService"; // Servicio para obtener productos y categorías del backend
 
 // Componente Productos - Página de listado de productos con filtros y búsqueda
 function Productos() {
   const [products, setProducts] = useState([]); // Estado para productos filtrados que se muestran
   const [allProducts, setAllProducts] = useState([]); // Estado para todos los productos disponibles
+  const [categories, setCategories] = useState([]); // Estado para categorías dinámicas
   const [loading, setLoading] = useState(true); // Estado de carga inicial
   const [error, setError] = useState(""); // Estado para errores
   const [refreshing, setRefreshing] = useState(false); // Estado para refresco de datos
   const [searchParams, setSearchParams] = useSearchParams(); // Hook para manejar parámetros de URL
   const location = useLocation(); // Hook para obtener ubicación actual
 
-  // Función para cargar productos desde el archivo JSON
-  const fetchProducts = (isRefresh = false) => {
+  // Función para cargar productos desde el backend
+  const fetchProducts = async (isRefresh = false) => {
     if (isRefresh) {
-      setRefreshing(true); // Activar estado de refresco
+      setRefreshing(true);
     } else {
-      setLoading(true); // Activar estado de carga inicial
+      setLoading(true);
     }
 
     try {
-      console.log("Datos importados:", productsData);
-      console.log("Productos:", productsData.products);
+      const productsData = await getProducts();
+      console.log("Productos cargados desde backend:", productsData);
 
-      if (productsData && productsData.products) {
-        setAllProducts(productsData.products); // Guardar todos los productos
-        filterProducts(productsData.products); // Aplicar filtros inmediatamente
-        setError(""); // Limpiar errores previos
+      if (productsData && productsData.length > 0) {
+        setAllProducts(productsData);
+        filterProducts(productsData);
+        setError("");
       } else {
-        throw new Error("No se encontraron productos en los datos");
+        setAllProducts([]);
+        setProducts([]);
+        setError("");
       }
     } catch (err) {
-      console.error("Error detallado:", err);
-      setError(`Error al cargar productos: ${err.message}`); // Mostrar error al usuario
+      console.error("Error cargando productos:", err);
+      setError(`Error al cargar productos: ${err.message}`);
+      setAllProducts([]);
+      setProducts([]);
     } finally {
-      setLoading(false); // Desactivar estado de carga
-      setRefreshing(false); // Desactivar estado de refresco
+      setLoading(false);
+      setRefreshing(false);
     }
   };
 
@@ -55,66 +60,36 @@ function Productos() {
       filtered = filtered.filter(product =>
         product.name.toLowerCase().includes(searchTerm) ||
         product.description.toLowerCase().includes(searchTerm) ||
-        product.category.toLowerCase().includes(searchTerm)
+        (product.categoryName && product.categoryName.toLowerCase().includes(searchTerm))
       );
     }
 
-    // Filtrar por categoría
+    // Filtrar por categoría (usando categoryName del producto)
     if (category) {
-      filtered = filtered.filter(product =>
-        product.category.toLowerCase() === category
-      );
+      filtered = filtered.filter(product => {
+        const productCategory = product.categoryName?.toLowerCase() || '';
+        return productCategory === category;
+      });
     }
 
     setProducts(filtered);
   };
 
-  useEffect(() => {
-    console.log("useEffect ejecutándose...");
-    console.log("productsData disponible:", productsData);
-
-    // Cargar datos del JSON principal
-    let allProductsList = [];
-    if (productsData && productsData.products && productsData.products.length > 0) {
-      allProductsList = [...productsData.products];
-    }
-
-    // Verificar si hay productos adicionales en localStorage (productos publicados por usuarios)
+  // Cargar categorías desde el backend
+  const fetchCategories = async () => {
     try {
-      const userProducts = JSON.parse(localStorage.getItem('userProducts') || '[]');
-      if (userProducts.length > 0) {
-        // Solo incluir productos activos en la lista general
-        const activeUserProducts = userProducts.filter(p => p.status === 'active');
-        // Combinar productos del JSON con productos de usuarios, evitando duplicados
-        const existingIds = allProductsList.map(p => p.id);
-        const newProducts = activeUserProducts.filter(p => !existingIds.includes(p.id));
-        allProductsList = [...allProductsList, ...newProducts];
-      }
-
-      // También verificar allProductsData por compatibilidad
-      const savedProductsData = localStorage.getItem('allProductsData');
-      if (savedProductsData) {
-        const parsedData = JSON.parse(savedProductsData);
-        if (parsedData.products) {
-          const existingIds = allProductsList.map(p => p.id);
-          const newProducts = parsedData.products.filter(p => !existingIds.includes(p.id));
-          allProductsList = [...allProductsList, ...newProducts];
-        }
-      }
-    } catch (error) {
-      console.log("Error cargando productos adicionales:", error);
+      const categoriesData = await getCategories();
+      setCategories([{ id: 0, name: "Todos" }, ...categoriesData]);
+    } catch (err) {
+      console.error("Error cargando categorías:", err);
+      setCategories([{ id: 0, name: "Todos" }]);
     }
+  };
 
-    if (allProductsList.length > 0) {
-      setAllProducts(allProductsList);
-      setProducts(allProductsList);
-      setLoading(false);
-      setError("");
-      console.log("Productos cargados:", allProductsList.length);
-    } else {
-      setError("No se encontraron productos");
-      setLoading(false);
-    }
+  useEffect(() => {
+    console.log("useEffect ejecutándose - cargando productos y categorías desde backend...");
+    fetchProducts();
+    fetchCategories();
   }, []);
 
   useEffect(() => {
@@ -135,19 +110,9 @@ function Productos() {
     setSearchParams({});
   };
 
-  const categories = [
-    { name: "Todos", value: "" },
-    { name: "Electrónicos", value: "electronicos" },
-    { name: "Ropa", value: "ropa" },
-    { name: "Hogar", value: "hogar" },
-    { name: "Deportes", value: "deportes" },
-    { name: "Libros", value: "libros" },
-    { name: "Belleza", value: "belleza" }
-  ];
-
-  const handleCategoryFilter = (categoryValue) => {
-    if (categoryValue) {
-      setSearchParams({ category: categoryValue });
+  const handleCategoryFilter = (categoryName) => {
+    if (categoryName && categoryName !== "Todos") {
+      setSearchParams({ category: categoryName.toLowerCase() });
     } else {
       setSearchParams({});
     }
@@ -166,7 +131,7 @@ function Productos() {
             <p className="text-sm text-gray-600 mb-2">
               Filtro aplicado: {currentSearch && `"${currentSearch}"`}
               {currentSearch && currentCategory && ' - '}
-              {currentCategory && categories.find(c => c.value === currentCategory)?.name}
+              {currentCategory && categories.find(c => c.name.toLowerCase() === currentCategory)?.name}
             </p>
           )}
           <h1 className="text-3xl font-bold text-gray-800 mb-4">Productos</h1>
@@ -192,7 +157,7 @@ function Productos() {
               <p className="text-gray-600">
                 Mostrando {products.length} producto{products.length !== 1 ? 's' : ''}
                 {currentSearch && ` para "${currentSearch}"`}
-                {currentCategory && ` en ${categories.find(c => c.value === currentCategory)?.name}`}
+                {currentCategory && ` en ${categories.find(c => c.name.toLowerCase() === currentCategory)?.name}`}
               </p>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">

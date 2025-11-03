@@ -4,10 +4,13 @@ import com.ecommerce.dto.CreateProductDTO;
 import com.ecommerce.dto.ProductDTO;
 import com.ecommerce.dto.UpdateProductDTO;
 import com.ecommerce.exception.ResourceNotFoundException;
+import com.ecommerce.model.Category;
 import com.ecommerce.model.Product;
+import com.ecommerce.repository.CategoryRepository;
 import com.ecommerce.repository.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -17,6 +20,9 @@ public class ProductService {
 
     @Autowired
     private ProductRepository productRepository;
+
+    @Autowired
+    private CategoryRepository categoryRepository;
 
     public List<ProductDTO> getAllProducts() {
         return productRepository.findAll().stream()
@@ -53,28 +59,34 @@ public class ProductService {
     }
 
     private ProductDTO convertToDTO(Product product) {
-        return new ProductDTO(
-                product.getId(),
-                product.getName(),
-                product.getDescription(),
-                product.getPrice(),
-                product.getStock(),
-                product.getCategory(),
-                product.getImageUrl()
-        );
+        return ProductDTO.builder()
+                .id(product.getId())
+                .name(product.getName())
+                .description(product.getDescription())
+                .price(product.getPrice())
+                .stock(product.getStock())
+                .categoryId(product.getCategory().getId())
+                .categoryName(product.getCategory().getName())
+                .imageUrl(product.getImageUrl())
+                .build();
     }
 
+    @Transactional
     private Product convertToEntity(CreateProductDTO createProductDTO) {
-        Product product = new Product();
-        product.setName(createProductDTO.getName());
-        product.setDescription(createProductDTO.getDescription());
-        product.setPrice(createProductDTO.getPrice());
-        product.setStock(createProductDTO.getStock());
-        product.setCategory(createProductDTO.getCategory());
-        product.setImageUrl(createProductDTO.getImageUrl());
-        return product;
+        Category category = categoryRepository.findById(createProductDTO.getCategoryId())
+                .orElseThrow(() -> new ResourceNotFoundException("Categoría", "id", createProductDTO.getCategoryId()));
+
+        return Product.builder()
+                .name(createProductDTO.getName())
+                .description(createProductDTO.getDescription())
+                .price(createProductDTO.getPrice())
+                .stock(createProductDTO.getStock())
+                .category(category)
+                .imageUrl(createProductDTO.getImageUrl())
+                .build();
     }
 
+    @Transactional
     private void updateProductFields(Product product, UpdateProductDTO updateProductDTO) {
         if (updateProductDTO.getName() != null) {
             product.setName(updateProductDTO.getName());
@@ -88,8 +100,10 @@ public class ProductService {
         if (updateProductDTO.getStock() != null) {
             product.setStock(updateProductDTO.getStock());
         }
-        if (updateProductDTO.getCategory() != null) {
-            product.setCategory(updateProductDTO.getCategory());
+        if (updateProductDTO.getCategoryId() != null) {
+            Category category = categoryRepository.findById(updateProductDTO.getCategoryId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Categoría", "id", updateProductDTO.getCategoryId()));
+            product.setCategory(category);
         }
         if (updateProductDTO.getImageUrl() != null) {
             product.setImageUrl(updateProductDTO.getImageUrl());

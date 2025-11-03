@@ -142,17 +142,19 @@ public class CartService {
     }
 
     private CartItemDTO convertToDTO(CartItem cartItem) {
-        ProductDTO productDTO = new ProductDTO(
-                cartItem.getProduct().getId(),
-                cartItem.getProduct().getName(),
-                cartItem.getProduct().getDescription(),
-                cartItem.getProduct().getPrice(),
-                cartItem.getProduct().getStock(),
-                cartItem.getProduct().getCategory(),
-                cartItem.getProduct().getImageUrl()
-        );
+        Product product = cartItem.getProduct();
+        ProductDTO productDTO = ProductDTO.builder()
+                .id(product.getId())
+                .name(product.getName())
+                .description(product.getDescription())
+                .price(product.getPrice())
+                .stock(product.getStock())
+                .categoryId(product.getCategory().getId())
+                .categoryName(product.getCategory().getName())
+                .imageUrl(product.getImageUrl())
+                .build();
 
-        double subtotal = cartItem.getProduct().getPrice() * cartItem.getQuantity();
+        double subtotal = product.getPrice() * cartItem.getQuantity();
 
         return new CartItemDTO(
                 cartItem.getId(),

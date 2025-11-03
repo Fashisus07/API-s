@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useCart } from "../context/CartContext";
-import usersData from "../data/users.json";
+import { getUserProfile, updateUserProfile, changePassword } from "../services/apiService";
 
 function PerfilUser() {
   const { user, isAuthenticated, logout } = useAuth();

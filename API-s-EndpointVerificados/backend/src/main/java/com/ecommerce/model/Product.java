@@ -1,9 +1,18 @@
 package com.ecommerce.model;
 
 import jakarta.persistence.*;
+import lombok.*;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "products")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class Product {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -12,7 +21,7 @@ public class Product {
     @Column(nullable = false)
     private String name;
 
-    @Column(nullable = false)
+    @Column(length = 1000)
     private String description;
 
     @Column(nullable = false)
@@ -21,24 +30,14 @@ public class Product {
     @Column(nullable = false)
     private Integer stock;
 
-    @Column(nullable = false)
-    private String category;
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "category_id", nullable = false)
+    private Category category;
 
+    @Column(length = 500)
     private String imageUrl;
 
-    // Getters and setters
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
-    public String getName() { return name; }
-    public void setName(String name) { this.name = name; }
-    public String getDescription() { return description; }
-    public void setDescription(String description) { this.description = description; }
-    public Double getPrice() { return price; }
-    public void setPrice(Double price) { this.price = price; }
-    public Integer getStock() { return stock; }
-    public void setStock(Integer stock) { this.stock = stock; }
-    public String getCategory() { return category; }
-    public void setCategory(String category) { this.category = category; }
-    public String getImageUrl() { return imageUrl; }
-    public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<CartItem> cartItems = new ArrayList<>();
 }

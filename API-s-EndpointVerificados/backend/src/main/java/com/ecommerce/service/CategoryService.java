@@ -25,15 +25,15 @@ public class CategoryService {
                 .collect(Collectors.toList());
     }
 
-    public CategoryDTO getCategoryById(String id) {
+    public CategoryDTO getCategoryById(Long id) {
         Category category = categoryRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Categoría", "id", id));
         return convertToDTO(category);
     }
 
     public CategoryDTO createCategory(CreateCategoryDTO createCategoryDTO) {
-        if (categoryRepository.existsById(createCategoryDTO.getId())) {
-            throw new BadRequestException("Ya existe una categoría con el ID: " + createCategoryDTO.getId());
+        if (categoryRepository.existsByName(createCategoryDTO.getName())) {
+            throw new BadRequestException("Ya existe una categoría con el nombre: " + createCategoryDTO.getName());
         }
 
         Category category = convertToEntity(createCategoryDTO);
@@ -41,7 +41,7 @@ public class CategoryService {
         return convertToDTO(savedCategory);
     }
 
-    public CategoryDTO updateCategory(String id, UpdateCategoryDTO updateCategoryDTO) {
+    public CategoryDTO updateCategory(Long id, UpdateCategoryDTO updateCategoryDTO) {
         Category existingCategory = categoryRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Categoría", "id", id));
 
@@ -50,7 +50,7 @@ public class CategoryService {
         return convertToDTO(updatedCategory);
     }
 
-    public void deleteCategory(String id) {
+    public void deleteCategory(Long id) {
         if (!categoryRepository.existsById(id)) {
             throw new ResourceNotFoundException("Categoría", "id", id);
         }
@@ -58,19 +58,19 @@ public class CategoryService {
     }
 
     private CategoryDTO convertToDTO(Category category) {
-        return new CategoryDTO(
-                category.getId(),
-                category.getName(),
-                category.getDescription()
-        );
+        return CategoryDTO.builder()
+                .id(category.getId())
+                .name(category.getName())
+                .description(category.getDescription())
+                .productCount(category.getProducts().size())
+                .build();
     }
 
     private Category convertToEntity(CreateCategoryDTO createCategoryDTO) {
-        Category category = new Category();
-        category.setId(createCategoryDTO.getId());
-        category.setName(createCategoryDTO.getName());
-        category.setDescription(createCategoryDTO.getDescription());
-        return category;
+        return Category.builder()
+                .name(createCategoryDTO.getName())
+                .description(createCategoryDTO.getDescription())
+                .build();
     }
 
     private void updateCategoryFields(Category category, UpdateCategoryDTO updateCategoryDTO) {

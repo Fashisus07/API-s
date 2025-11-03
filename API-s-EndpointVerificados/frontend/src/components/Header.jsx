@@ -1,9 +1,10 @@
 // Importar React y hooks necesarios para navegación y contextos
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom"; // Hooks para navegación y ubicación
 import { useAuth } from "../context/AuthContext"; // Contexto de autenticación
 import { useCart } from "../context/CartContext"; // Contexto del carrito
 import SearchBar from "./SearchBar"; // Componente de barra de búsqueda
+import { getCategories } from "../services/apiService"; // Servicio para obtener categorías
 
 // Componente Header - Barra de navegación principal de la aplicación
 function Header() {
@@ -11,12 +12,29 @@ function Header() {
   const { getTotalItems } = useCart(); // Obtener función para contar items del carrito
   const navigate = useNavigate(); // Hook para navegación programática
   const location = useLocation(); // Hook para obtener la ubicación actual
+  const [categories, setCategories] = useState([]); // Estado para categorías dinámicas
 
   // Función para manejar el cierre de sesión (actualmente no se usa en este componente)
   const handleLogout = () => {
     logout(); // Ejecutar logout del contexto
     navigate("/"); // Redirigir a la página principal
   };
+
+  // useEffect para cargar categorías desde el backend
+  useEffect(() => {
+    const loadCategories = async () => {
+      try {
+        const categoriesData = await getCategories();
+        // Cargar todas las categorías para el header
+        setCategories(categoriesData);
+      } catch (error) {
+        console.error('Error cargando categorías:', error);
+        setCategories([]);
+      }
+    };
+    
+    loadCategories();
+  }, []);
 
   return (
     <header className="bg-white text-secondary shadow-lg border-b border-gray-200">
@@ -111,12 +129,16 @@ function Header() {
         <div className="max-w-7xl mx-auto">
           <div className="flex items-center space-x-8 text-sm text-gray-600">
             <span className="font-semibold text-primary">Categorías:</span>
-            {/* Enlaces a diferentes categorías de productos */}
-            <Link to="/productos?category=electronicos" className="hover:text-primary transition">Electrónicos</Link>
-            <Link to="/productos?category=ropa" className="hover:text-primary transition">Ropa</Link>
-            <Link to="/productos?category=hogar" className="hover:text-primary transition">Hogar</Link>
-            <Link to="/productos?category=deportes" className="hover:text-primary transition">Deportes</Link>
-            <Link to="/productos?category=libros" className="hover:text-primary transition">Libros</Link>
+            {/* Enlaces a diferentes categorías de productos - cargadas dinámicamente */}
+            {categories.map((category) => (
+              <Link 
+                key={category.id} 
+                to={`/productos?category=${encodeURIComponent(category.name.toLowerCase())}`} 
+                className="hover:text-primary transition"
+              >
+                {category.name}
+              </Link>
+            ))}
             {/* Enlace para ver todas las categorías */}
             <Link to="/productos" className="text-primary hover:text-primary-dark transition font-medium">Ver todas →</Link>
           </div>

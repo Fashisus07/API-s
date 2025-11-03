@@ -3,7 +3,7 @@ import React, { useState, useEffect } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom"; // Hooks para parámetros de ruta y navegación
 import { useAuth } from "../context/AuthContext"; // Contexto de autenticación
 import { useCart } from "../context/CartContext"; // Contexto del carrito
-import productsData from "../data/bs.json"; // Datos de productos desde archivo JSON
+import { getProductById, getProducts } from "../services/apiService"; // Servicios para obtener productos del backend
 
 // Componente DetalleProducto - Página de detalle individual de un producto
 function DetalleProducto() {
@@ -19,35 +19,37 @@ function DetalleProducto() {
   const [message, setMessage] = useState(""); // Estado para mensajes de feedback
   const [relatedProducts, setRelatedProducts] = useState([]); // Estado para productos relacionados
 
-  // useEffect para cargar el producto al montar el componente
+  // useEffect para cargar el producto desde el backend
   useEffect(() => {
-    const loadProduct = () => {
+    const loadProduct = async () => {
       try {
+        setLoading(true);
         console.log("Loading product with ID:", id);
-        console.log("Available products:", productsData.products.length);
 
-        // Buscar el producto por ID en los datos
-        const foundProduct = productsData.products.find(p => p.id === parseInt(id));
+        // Obtener producto desde el backend
+        const foundProduct = await getProductById(parseInt(id));
         console.log("Found product:", foundProduct);
 
         if (foundProduct) {
-          setProduct(foundProduct); // Establecer producto encontrado
-          // Obtener productos relacionados de la misma categoría (excluyendo el actual)
-          const related = productsData.products
+          setProduct(foundProduct);
+          
+          // Obtener todos los productos para encontrar relacionados
+          const allProducts = await getProducts();
+          const related = allProducts
             .filter(p => p.category === foundProduct.category && p.id !== foundProduct.id)
-            .slice(0, 4); // Limitar a 4 productos relacionados
+            .slice(0, 4);
           console.log("Related products:", related);
-          setRelatedProducts(related); // Establecer productos relacionados
-          setError(""); // Limpiar errores
+          setRelatedProducts(related);
+          setError("");
         } else {
-          setError("Producto no encontrado"); // Mostrar error si no se encuentra
+          setError("Producto no encontrado");
           console.error("Product not found for ID:", id);
         }
       } catch (err) {
         console.error("Error loading product:", err);
-        setError("Error al cargar el producto"); // Mostrar error genérico
+        setError("Error al cargar el producto");
       } finally {
-        setLoading(false); // Finalizar estado de carga
+        setLoading(false);
       }
     };
 

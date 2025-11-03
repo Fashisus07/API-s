@@ -3,68 +3,128 @@ import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom"; // Hooks para navegación
 import { useAuth } from "../context/AuthContext"; // Contexto de autenticación
 import ProductCard from "../components/ProductCard"; // Componente de tarjeta de producto
-import productsData from "../data/bs.json"; // Datos de productos desde archivo JSON
+import { getCategories, getProducts } from "../services/apiService"; // Servicios para obtener datos del backend
 
 // Componente Inicio - Página principal de la aplicación
 function Inicio() {
   const { isAuthenticated, user } = useAuth(); // Obtener estado de autenticación y datos del usuario
   const navigate = useNavigate(); // Hook para navegación programática
   const [featuredProducts, setFeaturedProducts] = useState([]); // Estado para productos destacados
+  const [categories, setCategories] = useState([]); // Estado para categorías dinámicas
   const [loading, setLoading] = useState(true); // Estado de carga
 
-  // useEffect para cargar productos al montar el componente
+  // useEffect para cargar productos desde el backend
   useEffect(() => {
-    console.log("Inicio - useEffect ejecutándose...");
-    console.log("Inicio - productsData:", productsData);
-
-    // Inicializar lista de productos con datos del JSON principal
-    let allProductsList = [];
-    if (productsData && productsData.products) {
-      allProductsList = [...productsData.products]; // Copiar productos del JSON
-    }
-
-    // Verificar y cargar productos adicionales desde localStorage (productos publicados por usuarios)
-    try {
-      const userProducts = JSON.parse(localStorage.getItem('userProducts') || '[]');
-      if (userProducts.length > 0) {
-        // Filtrar solo productos activos para mostrar en la página principal
-        const activeUserProducts = userProducts.filter(p => p.status === 'active');
-        // Combinar productos del JSON con productos de usuarios, evitando duplicados por ID
-        const existingIds = allProductsList.map(p => p.id);
-        const newProducts = activeUserProducts.filter(p => !existingIds.includes(p.id));
-        allProductsList = [...allProductsList, ...newProducts];
+    const loadProducts = async () => {
+      try {
+        setLoading(true);
+        const productsData = await getProducts();
+        
+        // Seleccionar los primeros 8 productos como destacados
+        const featured = productsData.slice(0, 8);
+        setFeaturedProducts(featured);
+        console.log("Inicio - Productos cargados desde backend:", productsData.length);
+      } catch (error) {
+        console.error("Error cargando productos:", error);
+        setFeaturedProducts([]);
+      } finally {
+        setLoading(false);
       }
+    };
 
-      // Verificar también allProductsData por compatibilidad con versiones anteriores
-      const savedProductsData = localStorage.getItem('allProductsData');
-      if (savedProductsData) {
-        const parsedData = JSON.parse(savedProductsData);
-        if (parsedData.products) {
-          // Evitar duplicados al agregar productos guardados
-          const existingIds = allProductsList.map(p => p.id);
-          const newProducts = parsedData.products.filter(p => !existingIds.includes(p.id));
-          allProductsList = [...allProductsList, ...newProducts];
-        }
-      }
-    } catch (error) {
-      console.log("Error cargando productos adicionales:", error);
-    }
-
-    // Seleccionar los primeros 8 productos como destacados para mostrar en la página principal
-    const featured = allProductsList.slice(0, 8);
-    setFeaturedProducts(featured);
-    console.log("Inicio - Productos cargados:", allProductsList.length);
-    setLoading(false);
+    loadProducts();
   }, []);
 
-  const categories = [
-    { name: "Electrónicos", icon: "📱", color: "bg-blue-100", link: "/productos?category=electronicos" },
-    { name: "Ropa", icon: "👕", color: "bg-pink-100", link: "/productos?category=ropa" },
-    { name: "Hogar", icon: "🏠", color: "bg-green-100", link: "/productos?category=hogar" },
-    { name: "Deportes", icon: "⚽", color: "bg-orange-100", link: "/productos?category=deportes" },
-    { name: "Libros", icon: "📚", color: "bg-purple-100", link: "/productos?category=libros" },
-    { name: "Belleza", icon: "💄", color: "bg-red-100", link: "/productos?category=belleza" }
-  ];
+  // useEffect para cargar categorías desde el backend
+  useEffect(() => {
+    const loadCategories = async () => {
+      try {
+        const categoriesData = await getCategories();
+        
+        // Mapear categorías del backend con íconos y colores
+        const categoriesWithIcons = categoriesData.map((category, index) => {
+          // Asignar ícono según el nombre de la categoría
+          const iconMap = {
+            'electronicos': '📱',
+            'electrónicos': '📱',
+            'ropa': '👕',
+            'hogar': '🏠',
+            'deportes': '⚽',
+            'libros': '📚',
+            'belleza': '💄',
+            'calzado': '👟',
+            'juguetes': '🧸',
+            'alimentos': '🍕',
+            'muebles': '🛋️',
+            'tecnologia': '💻',
+            'tecnología': '💻',
+            'electronica': '📱',
+            'electrónica': '📱',
+            'accesorios': '👜',
+            'joyeria': '💍',
+            'joyería': '💍',
+            'mascotas': '🐾',
+            'jardin': '🌿',
+            'jardín': '🌿',
+            'automotriz': '🚗',
+            'herramientas': '🔧',
+            'musica': '🎵',
+            'música': '🎵',
+            'instrumentos': '🎸',
+            'videojuegos': '🎮',
+            'peliculas': '🎬',
+            'películas': '🎬',
+            'salud': '💊',
+            'bebes': '👶',
+            'bebés': '👶',
+            'oficina': '📎',
+            'arte': '🎨',
+            'cocina': '🍳',
+            'camping': '⛺',
+            'fitness': '💪'
+          };
+          
+          // Asignar colores de forma cíclica
+          const colors = [
+            'bg-blue-100',
+            'bg-pink-100',
+            'bg-green-100',
+            'bg-orange-100',
+            'bg-purple-100',
+            'bg-red-100',
+            'bg-yellow-100',
+            'bg-indigo-100',
+            'bg-teal-100',
+            'bg-cyan-100'
+          ];
+          
+          const categoryNameLower = category.name.toLowerCase();
+          const icon = iconMap[categoryNameLower] || '📦'; // Ícono por defecto
+          const color = colors[index % colors.length]; // Color cíclico
+          
+          return {
+            id: category.id,
+            name: category.name,
+            icon: icon,
+            color: color,
+            link: `/productos?category=${category.id}`
+          };
+        });
+        
+        setCategories(categoriesWithIcons);
+      } catch (error) {
+        console.error('Error cargando categorías:', error);
+        // Si falla, usar categorías por defecto
+        setCategories([
+          { name: "Electrónicos", icon: "📱", color: "bg-blue-100", link: "/productos?category=electronicos" },
+          { name: "Ropa", icon: "👕", color: "bg-pink-100", link: "/productos?category=ropa" },
+          { name: "Hogar", icon: "🏠", color: "bg-green-100", link: "/productos?category=hogar" }
+        ]);
+      }
+    };
+    
+    loadCategories();
+  }, []);
 
   const benefits = [
     {
