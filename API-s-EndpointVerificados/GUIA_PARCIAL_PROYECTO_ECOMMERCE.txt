@@ -1,0 +1,1003 @@
+================================================================================
+           GUÍA DE ESTUDIO - PARCIAL PROYECTO E-COMMERCE SPRING BOOT
+================================================================================
+
+ÍNDICE:
+1. Configuración del Proyecto
+2. Diseño de API RESTful
+3. Estructura del Proyecto (Arquitectura en Capas)
+4. Persistencia de Datos
+5. Seguridad
+6. Contenedorización
+
+================================================================================
+1. CONFIGURACIÓN DEL PROYECTO
+================================================================================
+
+--- ¿QUÉ ES? ---
+La configuración del proyecto establece las herramientas, dependencias y 
+frameworks necesarios para desarrollar una aplicación Spring Boot. Incluye:
+- Spring Boot: Framework para crear aplicaciones Java empresariales
+- Spring Data JPA: Abstracción para acceso a datos con JPA/Hibernate
+- Lombok: Biblioteca que reduce código boilerplate con anotaciones
+- Maven: Gestor de dependencias y construcción del proyecto
+
+--- ¿CÓMO SE APLICÓ EN EL PROYECTO? ---
+El proyecto utiliza Maven como gestor de dependencias, configurado en pom.xml
+con Spring Boot 3.2.5 y Java 17. Se integró PostgreSQL como base de datos
+principal y H2 para pruebas. Lombok se usa en todas las entidades y DTOs.
+
+--- EJEMPLOS EN EL PROYECTO ---
+
+1. Archivo pom.xml - Dependencias principales:
+   - spring-boot-starter-web: Para crear APIs REST
+   - spring-boot-starter-data-jpa: Para persistencia con JPA
+   - spring-boot-starter-security: Para seguridad
+   - lombok: Para reducir código boilerplate
+   - postgresql: Driver de base de datos PostgreSQL
+   - jjwt (io.jsonwebtoken): Para manejo de tokens JWT
+
+2. Uso de Lombok en entidades (Product.java):
+   @Entity
+   @Getter
+   @Setter
+   @NoArgsConstructor
+   @AllArgsConstructor
+   @Builder
+   public class Product { ... }
+   
+   Estas anotaciones generan automáticamente getters, setters, constructores
+   y el patrón Builder, reduciendo cientos de líneas de código.
+
+3. Configuración de base de datos (application.properties):
+   spring.jpa.hibernate.ddl-auto=update
+   spring.jpa.database-platform=org.hibernate.dialect.PostgreSQLDialect
+   jwt.secret=MySuperSecretKeyForJWTs
+   jwt.expiration=86400000
+
+
+================================================================================
+2. DISEÑO DE API RESTful
+================================================================================
+
+--- ¿QUÉ ES? ---
+REST (Representational State Transfer) es un estilo arquitectónico para diseñar
+APIs web. Define endpoints que representan recursos y utiliza métodos HTTP
+estándar (GET, POST, PUT, DELETE) para operaciones CRUD.
+
+Principios REST:
+- Recursos identificados por URIs (/api/products, /api/users)
+- Operaciones mediante métodos HTTP estándar
+- Respuestas con códigos de estado HTTP apropiados
+- Comunicación sin estado (stateless)
+
+--- ¿CÓMO SE APLICÓ EN EL PROYECTO? ---
+Se crearon APIs RESTful para las entidades principales del dominio:
+- Products (Productos)
+- Categories (Categorías)
+- Users (Usuarios)
+- Cart (Carrito de compras)
+- Auth (Autenticación)
+
+Cada API sigue las convenciones REST con endpoints bien definidos.
+
+--- EJEMPLOS EN EL PROYECTO ---
+
+1. ProductController - API de Productos:
+   
+   @RestController
+   @RequestMapping("/api/products")
+   public class ProductController {
+   
+       @GetMapping                              // GET /api/products
+       public ResponseEntity<List<ProductDTO>> getAllProducts()
+       
+       @GetMapping("/{id}")                     // GET /api/products/1
+       public ResponseEntity<ProductDTO> getProductById(@PathVariable Long id)
+       
+       @PostMapping                             // POST /api/products
+       public ResponseEntity<ProductDTO> createProduct(@Valid @RequestBody CreateProductDTO dto)
+       
+       @PutMapping("/{id}")                     // PUT /api/products/1
+       public ResponseEntity<ProductDTO> updateProduct(@PathVariable Long id, @RequestBody UpdateProductDTO dto)
+       
+       @DeleteMapping("/{id}")                  // DELETE /api/products/1
+       public ResponseEntity<Void> deleteProduct(@PathVariable Long id)
+   }
+
+2. AuthController - API de Autenticación:
+   
+   @RestController
+   @RequestMapping("/api/auth")
+   public class AuthController {
+   
+       @PostMapping("/register")                // POST /api/auth/register
+       public ResponseEntity<AuthResponseDTO> register(@Valid @RequestBody RegisterDTO dto)
+       
+       @PostMapping("/login")                   // POST /api/auth/login
+       public ResponseEntity<AuthResponseDTO> login(@Valid @RequestBody LoginDTO dto)
+   }
+
+3. Códigos de estado HTTP utilizados:
+   - 200 OK: Operación exitosa (GET, PUT)
+   - 201 CREATED: Recurso creado exitosamente (POST)
+   - 204 NO CONTENT: Eliminación exitosa (DELETE)
+   - 400 BAD REQUEST: Datos inválidos
+   - 401 UNAUTHORIZED: No autenticado
+   - 404 NOT FOUND: Recurso no encontrado
+   - 500 INTERNAL SERVER ERROR: Error del servidor
+
+
+================================================================================
+3. ESTRUCTURA DEL PROYECTO (ARQUITECTURA EN CAPAS)
+================================================================================
+
+--- ¿QUÉ ES? ---
+La arquitectura en capas es un patrón de diseño que organiza el código en
+capas con responsabilidades específicas. Cada capa solo se comunica con
+las capas adyacentes, promoviendo separación de responsabilidades.
+
+Capas principales:
+1. Presentación (Controllers): Maneja requests HTTP
+2. Lógica de Negocio (Services): Contiene la lógica de la aplicación
+3. Acceso a Datos (Repositories): Interactúa con la base de datos
+4. Dominio/Modelo (Entities/DTOs): Define las estructuras de datos
+
+--- ¿CÓMO SE APLICÓ EN EL PROYECTO? ---
+El proyecto implementa una arquitectura en capas completa con separación
+clara de responsabilidades. Cada capa tiene su propio paquete y anotaciones
+específicas de Spring.
+
+Estructura de paquetes:
+- com.ecommerce.controller: Controladores REST
+- com.ecommerce.service: Servicios con lógica de negocio
+- com.ecommerce.repository: Repositorios JPA
+- com.ecommerce.model: Entidades del dominio
+- com.ecommerce.dto: Data Transfer Objects
+- com.ecommerce.exception: Manejo de excepciones
+- com.ecommerce.security: Configuración de seguridad
+
+--- EJEMPLOS EN EL PROYECTO ---
+
+=== CAPA DE PRESENTACIÓN - CONTROLADORES (@RestController) ===
+
+ProductController.java:
+   @RestController
+   @RequestMapping("/api/products")
+   @CrossOrigin(origins = "http://localhost:3000")
+   public class ProductController {
+       
+       @Autowired
+       private ProductService productService;
+       
+       @GetMapping
+       public ResponseEntity<List<ProductDTO>> getAllProducts() {
+           List<ProductDTO> products = productService.getAllProducts();
+           return ResponseEntity.ok(products);
+       }
+       
+       @PostMapping
+       public ResponseEntity<ProductDTO> createProduct(@Valid @RequestBody CreateProductDTO dto) {
+           ProductDTO createdProduct = productService.createProduct(dto);
+           return ResponseEntity.status(HttpStatus.CREATED).body(createdProduct);
+       }
+   }
+
+Responsabilidades:
+- Recibir y validar requests HTTP
+- Delegar lógica de negocio a los servicios
+- Retornar respuestas HTTP apropiadas
+- Manejo de CORS con @CrossOrigin
+
+
+=== CAPA DE LÓGICA DE NEGOCIO - SERVICIOS (@Service) ===
+
+ProductService.java:
+   @Service
+   public class ProductService {
+       
+       @Autowired
+       private ProductRepository productRepository;
+       
+       @Autowired
+       private CategoryRepository categoryRepository;
+       
+       public ProductDTO getProductById(Long id) {
+           Product product = productRepository.findById(id)
+               .orElseThrow(() -> new ResourceNotFoundException("Producto", "id", id));
+           return convertToDTO(product);
+       }
+       
+       @Transactional
+       public ProductDTO createProduct(CreateProductDTO createProductDTO) {
+           Category category = categoryRepository.findById(createProductDTO.getCategoryId())
+               .orElseThrow(() -> new ResourceNotFoundException("Categoría", "id", 
+                                   createProductDTO.getCategoryId()));
+           
+           Product product = Product.builder()
+               .name(createProductDTO.getName())
+               .price(createProductDTO.getPrice())
+               .stock(createProductDTO.getStock())
+               .category(category)
+               .build();
+           
+           Product savedProduct = productRepository.save(product);
+           return convertToDTO(savedProduct);
+       }
+       
+       private ProductDTO convertToDTO(Product product) {
+           return ProductDTO.builder()
+               .id(product.getId())
+               .name(product.getName())
+               .price(product.getPrice())
+               .categoryName(product.getCategory().getName())
+               .build();
+       }
+   }
+
+Responsabilidades:
+- Implementar la lógica de negocio
+- Validar reglas de negocio
+- Coordinar operaciones entre repositorios
+- Convertir entre Entidades y DTOs
+- Manejar transacciones con @Transactional
+
+
+=== CAPA DE ACCESO A DATOS - REPOSITORIOS (@Repository) ===
+
+ProductRepository.java:
+   public interface ProductRepository extends JpaRepository<Product, Long> {
+   }
+
+UserRepository.java:
+   public interface UserRepository extends JpaRepository<User, Long> {
+       Optional<User> findByEmail(String email);
+       Optional<User> findByUsername(String username);
+       boolean existsByEmail(String email);
+       boolean existsByUsername(String username);
+   }
+
+Características:
+- Extiende JpaRepository<Entity, ID>
+- Métodos CRUD automáticos: save(), findById(), findAll(), deleteById()
+- Métodos personalizados usando convenciones de nombres
+- Spring Data JPA genera la implementación automáticamente
+
+
+=== CAPA DE DOMINIO/MODELO ===
+
+--- ENTIDADES (@Entity) ---
+
+Product.java:
+   @Entity
+   @Table(name = "products")
+   @Getter
+   @Setter
+   @NoArgsConstructor
+   @AllArgsConstructor
+   @Builder
+   public class Product {
+       
+       @Id
+       @GeneratedValue(strategy = GenerationType.IDENTITY)
+       private Long id;
+       
+       @Column(nullable = false)
+       private String name;
+       
+       @Column(nullable = false)
+       private Double price;
+       
+       @Column(nullable = false)
+       private Integer stock;
+       
+       @ManyToOne(fetch = FetchType.EAGER)
+       @JoinColumn(name = "category_id", nullable = false)
+       private Category category;
+       
+       @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
+       private List<CartItem> cartItems = new ArrayList<>();
+   }
+
+User.java:
+   @Entity
+   @Table(name = "users")
+   public class User {
+       @Id
+       @GeneratedValue(strategy = GenerationType.IDENTITY)
+       private Long id;
+       
+       @Column(nullable = false, unique = true)
+       private String email;
+       
+       @Column(nullable = false)
+       @JsonIgnore
+       private String password;
+       
+       @Column(nullable = false)
+       @Builder.Default
+       private String role = "USER";
+       
+       @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+       @JsonIgnore
+       private List<CartItem> cartItems = new ArrayList<>();
+   }
+
+Anotaciones JPA principales:
+- @Entity: Define una entidad JPA
+- @Table: Especifica el nombre de la tabla
+- @Id: Define la clave primaria
+- @GeneratedValue: Estrategia de generación de ID
+- @Column: Configura la columna (nullable, unique, length)
+- @ManyToOne: Relación muchos a uno
+- @OneToMany: Relación uno a muchos
+- @JoinColumn: Define la columna de unión (foreign key)
+
+
+--- RELACIONES JPA EN EL PROYECTO ---
+
+1. @ManyToOne - Product -> Category:
+   Muchos productos pertenecen a una categoría
+   
+   @ManyToOne(fetch = FetchType.EAGER)
+   @JoinColumn(name = "category_id", nullable = false)
+   private Category category;
+
+2. @OneToMany - Category -> Products:
+   Una categoría tiene muchos productos
+   
+   @OneToMany(mappedBy = "category", cascade = CascadeType.ALL, orphanRemoval = true)
+   @JsonIgnore
+   private List<Product> products = new ArrayList<>();
+
+3. @OneToMany - User -> CartItems:
+   Un usuario tiene muchos items en el carrito
+   
+   @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+   @JsonIgnore
+   private List<CartItem> cartItems = new ArrayList<>();
+
+
+--- DTOs (Data Transfer Objects) ---
+
+ProductDTO.java:
+   @Getter
+   @Setter
+   @NoArgsConstructor
+   @AllArgsConstructor
+   @Builder
+   public class ProductDTO {
+       private Long id;
+       private String name;
+       private String description;
+       private Double price;
+       private Integer stock;
+       private Long categoryId;
+       private String categoryName;
+       private String imageUrl;
+   }
+
+CreateProductDTO.java:
+   @Getter
+   @Setter
+   public class CreateProductDTO {
+       @NotBlank(message = "El nombre es obligatorio")
+       private String name;
+       
+       @NotNull(message = "El precio es obligatorio")
+       @Positive(message = "El precio debe ser positivo")
+       private Double price;
+       
+       @NotNull(message = "El stock es obligatorio")
+       @Min(value = 0, message = "El stock no puede ser negativo")
+       private Integer stock;
+       
+       @NotNull(message = "La categoría es obligatoria")
+       private Long categoryId;
+   }
+
+Propósito de los DTOs:
+- Separar la representación de datos de las entidades
+- Evitar exponer la estructura interna de la base de datos
+- Permitir validaciones específicas por operación
+- Prevenir problemas de serialización (lazy loading, referencias circulares)
+- Diferentes DTOs para diferentes operaciones (Create, Update, Response)
+
+
+=== MANEJO DE EXCEPCIONES (@ControllerAdvice) ===
+
+GlobalExceptionHandler.java:
+   @RestControllerAdvice
+   public class GlobalExceptionHandler {
+       
+       @ExceptionHandler(ResourceNotFoundException.class)
+       public ResponseEntity<ErrorResponse> handleResourceNotFoundException(
+               ResourceNotFoundException ex, WebRequest request) {
+           ErrorResponse errorResponse = new ErrorResponse(
+               HttpStatus.NOT_FOUND.value(),
+               "Not Found",
+               ex.getMessage(),
+               request.getDescription(false)
+           );
+           return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
+       }
+       
+       @ExceptionHandler(MethodArgumentNotValidException.class)
+       public ResponseEntity<ErrorResponse> handleValidationExceptions(
+               MethodArgumentNotValidException ex, WebRequest request) {
+           List<String> details = new ArrayList<>();
+           for (FieldError error : ex.getBindingResult().getFieldErrors()) {
+               details.add(error.getField() + ": " + error.getDefaultMessage());
+           }
+           
+           ErrorResponse errorResponse = new ErrorResponse(
+               HttpStatus.BAD_REQUEST.value(),
+               "Validation Failed",
+               "Los datos proporcionados no son válidos",
+               request.getDescription(false),
+               details
+           );
+           return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+       }
+   }
+
+Excepciones personalizadas:
+- ResourceNotFoundException: Cuando no se encuentra un recurso (404)
+- BadRequestException: Cuando la solicitud es inválida (400)
+- UnauthorizedException: Cuando no hay autorización (401)
+
+Beneficios:
+- Manejo centralizado de errores
+- Respuestas de error consistentes
+- Separación de la lógica de manejo de errores
+- Mejor experiencia de usuario con mensajes claros
+
+
+================================================================================
+4. PERSISTENCIA DE DATOS
+================================================================================
+
+--- ¿QUÉ ES? ---
+JPA (Java Persistence API) es una especificación de Java para mapear objetos
+Java a tablas de base de datos (ORM - Object-Relational Mapping). Hibernate
+es la implementación de JPA más popular.
+
+Conceptos clave:
+- Entidades: Clases Java que representan tablas
+- EntityManager: Gestiona el ciclo de vida de las entidades
+- Transacciones: Garantizan consistencia de datos
+- Relaciones: Mapean relaciones entre tablas (1:1, 1:N, N:M)
+
+--- ¿CÓMO SE APLICÓ EN EL PROYECTO? ---
+Se utilizó Spring Data JPA con Hibernate para mapear entidades a PostgreSQL.
+Se definieron relaciones bidireccionales entre entidades con cascadas y
+manejo de huérfanos. La configuración permite que Hibernate actualice el
+esquema automáticamente.
+
+--- EJEMPLOS EN EL PROYECTO ---
+
+1. Configuración de JPA (application.properties):
+   spring.jpa.hibernate.ddl-auto=update
+   spring.jpa.show-sql=true
+   spring.jpa.properties.hibernate.format_sql=true
+   spring.jpa.database-platform=org.hibernate.dialect.PostgreSQLDialect
+
+   - ddl-auto=update: Actualiza el esquema automáticamente
+   - show-sql=true: Muestra las queries SQL en consola
+   - format_sql=true: Formatea las queries para mejor lectura
+
+2. Entidad con relaciones (Category.java):
+   @Entity
+   @Table(name = "categories")
+   public class Category {
+       @Id
+       @GeneratedValue(strategy = GenerationType.IDENTITY)
+       private Long id;
+       
+       @Column(nullable = false, unique = true)
+       private String name;
+       
+       @Column(length = 500)
+       private String description;
+       
+       @OneToMany(mappedBy = "category", cascade = CascadeType.ALL, orphanRemoval = true)
+       @JsonIgnore
+       private List<Product> products = new ArrayList<>();
+       
+       // Helper methods para mantener sincronización bidireccional
+       public void addProduct(Product product) {
+           products.add(product);
+           product.setCategory(this);
+       }
+       
+       public void removeProduct(Product product) {
+           products.remove(product);
+           product.setCategory(null);
+       }
+   }
+
+3. Cascadas y Orphan Removal:
+   - cascade = CascadeType.ALL: Propaga todas las operaciones
+     (persist, merge, remove, refresh, detach)
+   - orphanRemoval = true: Elimina entidades huérfanas automáticamente
+   
+   Ejemplo: Si se elimina una categoría, todos sus productos se eliminan
+
+4. Fetch Types:
+   - FetchType.EAGER: Carga la relación inmediatamente con la entidad
+   - FetchType.LAZY: Carga la relación solo cuando se accede a ella
+   
+   @ManyToOne(fetch = FetchType.EAGER)
+   private Category category;
+
+5. Relación bidireccional Product <-> Category:
+   
+   En Product:
+   @ManyToOne(fetch = FetchType.EAGER)
+   @JoinColumn(name = "category_id", nullable = false)
+   private Category category;
+   
+   En Category:
+   @OneToMany(mappedBy = "category", cascade = CascadeType.ALL, orphanRemoval = true)
+   private List<Product> products = new ArrayList<>();
+   
+   - mappedBy indica el lado propietario de la relación
+   - JoinColumn define la columna de clave foránea en la tabla products
+
+6. Transacciones con @Transactional:
+   @Transactional
+   public ProductDTO createProduct(CreateProductDTO dto) {
+       // Todas las operaciones dentro se ejecutan en una transacción
+       // Si hay error, se hace rollback automáticamente
+       Category category = categoryRepository.findById(dto.getCategoryId())
+           .orElseThrow(() -> new ResourceNotFoundException("Categoría", "id", dto.getCategoryId()));
+       
+       Product product = Product.builder()
+           .name(dto.getName())
+           .category(category)
+           .build();
+       
+       return convertToDTO(productRepository.save(product));
+   }
+
+
+================================================================================
+5. SEGURIDAD
+================================================================================
+
+--- ¿QUÉ ES? ---
+Spring Security es un framework de autenticación y control de acceso para
+aplicaciones Spring. JWT (JSON Web Token) es un estándar para crear tokens
+de acceso que permiten autenticación sin estado (stateless).
+
+Conceptos clave:
+- Autenticación: Verificar la identidad del usuario
+- Autorización: Verificar los permisos del usuario
+- JWT: Token firmado que contiene información del usuario
+- Roles: Permisos asignados a usuarios (USER, ADMIN)
+- CORS: Permite peticiones desde diferentes orígenes
+- BCrypt: Algoritmo de encriptación de contraseñas
+
+--- ¿CÓMO SE APLICÓ EN EL PROYECTO? ---
+Se implementó Spring Security con autenticación JWT. Los usuarios se registran
+y reciben un token que deben incluir en las peticiones. Los endpoints están
+protegidos según roles. CORS está configurado para permitir el frontend.
+Las contraseñas se encriptan con BCrypt.
+
+--- EJEMPLOS EN EL PROYECTO ---
+
+=== CONFIGURACIÓN DE SEGURIDAD ===
+
+SecurityConfig.java:
+   @Configuration
+   @EnableWebSecurity
+   public class SecurityConfig {
+       
+       @Autowired
+       private JwtAuthenticationFilter jwtAuthenticationFilter;
+       
+       @Bean
+       public PasswordEncoder passwordEncoder() {
+           return new BCryptPasswordEncoder();
+       }
+       
+       @Bean
+       public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+           http
+               .csrf(csrf -> csrf.disable())
+               .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+               .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+               .authorizeHttpRequests(auth -> auth
+                   .requestMatchers("/api/auth/**").permitAll()
+                   .requestMatchers(HttpMethod.GET, "/api/products").permitAll()
+                   .requestMatchers(HttpMethod.GET, "/api/products/**").permitAll()
+                   .requestMatchers(HttpMethod.GET, "/api/categories").permitAll()
+                   .anyRequest().authenticated()
+               )
+               .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+           return http.build();
+       }
+   }
+
+Explicación:
+- csrf().disable(): Deshabilita CSRF para APIs REST (no es necesario con JWT)
+- SessionCreationPolicy.STATELESS: No crea sesiones HTTP
+- permitAll(): Endpoints públicos (login, register, GET products)
+- authenticated(): Endpoints que requieren autenticación
+- addFilterBefore(): Agrega el filtro JWT antes del filtro de autenticación
+
+
+=== GENERACIÓN Y VALIDACIÓN DE JWT ===
+
+JwtUtil.java:
+   @Component
+   public class JwtUtil {
+       @Value("${jwt.secret}")
+       private String secret;
+       
+       @Value("${jwt.expiration}")
+       private long expiration;
+       
+       public String generateToken(String email, Set<String> roles) {
+           Key key = Keys.hmacShaKeyFor(secret.getBytes());
+           return Jwts.builder()
+                   .setSubject(email)
+                   .claim("roles", roles)
+                   .setIssuedAt(new Date())
+                   .setExpiration(new Date(System.currentTimeMillis() + expiration))
+                   .signWith(key, SignatureAlgorithm.HS256)
+                   .compact();
+       }
+       
+       public String extractEmail(String token) {
+           Key key = Keys.hmacShaKeyFor(secret.getBytes());
+           return Jwts.parserBuilder()
+                   .setSigningKey(key)
+                   .build()
+                   .parseClaimsJws(token)
+                   .getBody()
+                   .getSubject();
+       }
+       
+       public boolean validateToken(String token) {
+           try {
+               Key key = Keys.hmacShaKeyFor(secret.getBytes());
+               Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
+               return true;
+           } catch (Exception e) {
+               return false;
+           }
+       }
+   }
+
+Estructura del JWT:
+- Header: Tipo de token y algoritmo de firma
+- Payload: Datos del usuario (email, roles, expiración)
+- Signature: Firma digital para verificar integridad
+
+
+=== AUTENTICACIÓN Y REGISTRO ===
+
+AuthService.java:
+   @Service
+   public class AuthService {
+       
+       @Autowired
+       private UserRepository userRepository;
+       
+       @Autowired
+       private PasswordEncoder passwordEncoder;
+       
+       @Autowired
+       private JwtUtil jwtUtil;
+       
+       public AuthResponseDTO register(RegisterDTO registerDTO) {
+           if (userRepository.existsByEmail(registerDTO.getEmail())) {
+               throw new BadRequestException("El email ya está registrado");
+           }
+           
+           User user = User.builder()
+                   .username(registerDTO.getUsername())
+                   .email(registerDTO.getEmail())
+                   .password(passwordEncoder.encode(registerDTO.getPassword()))
+                   .firstName(registerDTO.getFirstName())
+                   .lastName(registerDTO.getLastName())
+                   .role("USER")
+                   .build();
+           
+           userRepository.save(user);
+           
+           String token = jwtUtil.generateToken(user.getEmail(), Set.of(user.getRole()));
+           
+           return new AuthResponseDTO(token, user.getEmail(), user.getRole());
+       }
+       
+       public AuthResponseDTO login(LoginDTO loginDTO) {
+           User user = userRepository.findByEmail(loginDTO.getEmail())
+                   .orElseThrow(() -> new UnauthorizedException("Credenciales inválidas"));
+           
+           if (!passwordEncoder.matches(loginDTO.getPassword(), user.getPassword())) {
+               throw new UnauthorizedException("Credenciales inválidas");
+           }
+           
+           String token = jwtUtil.generateToken(user.getEmail(), Set.of(user.getRole()));
+           
+           return new AuthResponseDTO(token, user.getEmail(), user.getRole());
+       }
+   }
+
+Flujo de autenticación:
+1. Usuario se registra o hace login
+2. Backend valida credenciales
+3. Backend genera token JWT
+4. Frontend guarda el token (localStorage)
+5. Frontend incluye token en header Authorization: Bearer <token>
+6. Backend valida token en cada request
+
+
+=== CONFIGURACIÓN DE CORS ===
+
+En SecurityConfig.java:
+   @Bean
+   public CorsConfigurationSource corsConfigurationSource() {
+       CorsConfiguration configuration = new CorsConfiguration();
+       configuration.setAllowedOriginPatterns(Arrays.asList("*"));
+       configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+       configuration.setAllowedHeaders(Arrays.asList("*"));
+       configuration.setAllowCredentials(true);
+       UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+       source.registerCorsConfiguration("/**", configuration);
+       return source;
+   }
+
+En application.properties:
+   spring.web.cors.allowed-origins=http://localhost:3000
+   spring.web.cors.allowed-methods=*
+   spring.web.cors.allowed-headers=*
+
+Propósito de CORS:
+- Permite que el frontend (React en puerto 3000) haga peticiones al backend (puerto 8080)
+- Sin CORS, el navegador bloquearía las peticiones por política de mismo origen
+- Configurado tanto a nivel global (SecurityConfig) como en application.properties
+
+
+=== REGLAS DE ACCESO BASADAS EN ROLES ===
+
+Endpoints públicos (permitAll):
+- POST /api/auth/register: Registro de usuarios
+- POST /api/auth/login: Login de usuarios
+- GET /api/products: Listar productos
+- GET /api/products/{id}: Ver detalle de producto
+- GET /api/categories: Listar categorías
+
+Endpoints protegidos (authenticated):
+- POST /api/products: Crear producto (requiere autenticación)
+- PUT /api/products/{id}: Actualizar producto
+- DELETE /api/products/{id}: Eliminar producto
+- POST /api/cart: Agregar al carrito
+- GET /api/cart: Ver carrito del usuario
+- PUT /api/profile: Actualizar perfil
+
+
+================================================================================
+6. CONTENEDORIZACIÓN
+================================================================================
+
+--- ¿QUÉ ES? ---
+Docker es una plataforma para desarrollar, enviar y ejecutar aplicaciones en
+contenedores. Un contenedor empaqueta una aplicación con todas sus dependencias,
+garantizando que funcione de manera consistente en cualquier entorno.
+
+Conceptos clave:
+- Dockerfile: Archivo con instrucciones para construir una imagen
+- Imagen: Plantilla inmutable con la aplicación y sus dependencias
+- Contenedor: Instancia en ejecución de una imagen
+- Docker Hub: Registro público de imágenes Docker
+- docker-compose: Herramienta para definir aplicaciones multi-contenedor
+
+--- ¿CÓMO SE APLICÓ EN EL PROYECTO? ---
+Se creó un Dockerfile para el backend Spring Boot que construye la aplicación
+con Maven y la ejecuta en un contenedor Java. La imagen se publicó en Docker Hub
+para facilitar el despliegue. Se usa docker-compose para orquestar backend,
+frontend, base de datos y pgAdmin.
+
+--- EJEMPLOS EN EL PROYECTO ---
+
+=== DOCKERFILE DEL BACKEND ===
+
+backend/Dockerfile:
+   # Etapa 1: Build - Compilar la aplicación
+   FROM maven:3.9.6-eclipse-temurin-17-alpine AS build
+   WORKDIR /app
+   COPY pom.xml /app/
+   RUN mvn dependency:go-offline -B
+   COPY src /app/src
+   RUN mvn clean package -DskipTests
+   
+   # Etapa 2: Runtime - Ejecutar la aplicación
+   FROM eclipse-temurin:17-jdk-alpine
+   WORKDIR /app
+   COPY --from=build /app/target/backend-1.0.0.jar ./backend.jar
+   EXPOSE 8080
+   ENTRYPOINT ["java", "-jar", "backend.jar"]
+
+Explicación:
+- Multi-stage build: Separa compilación y ejecución para imagen más liviana
+- Etapa build: Usa Maven para compilar el proyecto
+- Etapa runtime: Solo copia el JAR compilado, sin Maven ni código fuente
+- EXPOSE 8080: Documenta que el contenedor escucha en puerto 8080
+- ENTRYPOINT: Comando para ejecutar la aplicación
+
+
+=== DOCKER-COMPOSE PARA DESARROLLO ===
+
+docker-compose.yml:
+   version: '3.8'
+   services:
+     db:
+       image: postgres:13
+       environment:
+         POSTGRES_DB: ecommerce
+         POSTGRES_USER: postgres
+         POSTGRES_PASSWORD: postgres
+       ports:
+         - "5433:5432"
+       volumes:
+         - pgdata:/var/lib/postgresql/data
+     
+     backend:
+       build: ./backend
+       ports:
+         - "8080:8080"
+       environment:
+         SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/ecommerce
+         SPRING_DATASOURCE_USERNAME: postgres
+         SPRING_DATASOURCE_PASSWORD: postgres
+         JWT_SECRET: MySuperSecretKeyForJWTs
+         JWT_EXPIRATION: 86400000
+       depends_on:
+         - db
+     
+     frontend:
+       build: ./frontend
+       ports:
+         - "3000:80"
+       depends_on:
+         - backend
+     
+     pgadmin:
+       image: dpage/pgadmin4:latest
+       environment:
+         PGADMIN_DEFAULT_EMAIL: admin@admin.com
+         PGADMIN_DEFAULT_PASSWORD: admin
+       ports:
+         - "5050:80"
+       depends_on:
+         - db
+   
+   volumes:
+     pgdata:
+
+Características:
+- build: ./backend - Construye la imagen desde el código fuente local
+- depends_on: Define orden de inicio de contenedores
+- volumes: Persiste datos de PostgreSQL
+- environment: Variables de entorno para configuración
+
+
+=== DOCKER-COMPOSE PARA PRODUCCIÓN ===
+
+docker-compose.prod.yml:
+   version: '3.8'
+   services:
+     db:
+       image: postgres:13
+       environment:
+         POSTGRES_DB: ecommerce
+         POSTGRES_USER: postgres
+         POSTGRES_PASSWORD: postgres
+       ports:
+         - "5433:5432"
+       volumes:
+         - pgdata:/var/lib/postgresql/data
+     
+     backend:
+       image: facu07/ecommerce-backend:latest
+       ports:
+         - "8080:8080"
+       environment:
+         SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/ecommerce
+         SPRING_DATASOURCE_USERNAME: postgres
+         SPRING_DATASOURCE_PASSWORD: postgres
+         JWT_SECRET: MySuperSecretKeyForJWTs
+         JWT_EXPIRATION: 86400000
+       depends_on:
+         - db
+     
+     frontend:
+       image: facu07/ecommerce-frontend:latest
+       ports:
+         - "3000:80"
+       depends_on:
+         - backend
+   
+   volumes:
+     pgdata:
+
+Diferencia con desarrollo:
+- image: facu07/ecommerce-backend:latest - Usa imagen pre-construida de Docker Hub
+- No necesita compilar, descarga imagen lista para usar
+- Más rápido para desplegar en producción
+
+
+=== PUBLICACIÓN EN DOCKER HUB ===
+
+Comandos para publicar:
+   # 1. Construir la imagen
+   docker build -t facu07/ecommerce-backend:latest ./backend
+   
+   # 2. Login en Docker Hub
+   docker login
+   
+   # 3. Publicar la imagen
+   docker push facu07/ecommerce-backend:latest
+
+Beneficios:
+- Imagen disponible públicamente
+- Fácil despliegue en cualquier servidor
+- Versionado de imágenes (tags)
+- Integración con CI/CD
+
+
+=== COMANDOS DOCKER ÚTILES ===
+
+Desarrollo:
+   docker-compose up                    # Inicia todos los servicios
+   docker-compose up -d                 # Inicia en modo detached (background)
+   docker-compose down                  # Detiene y elimina contenedores
+   docker-compose logs backend          # Ver logs del backend
+   docker-compose restart backend       # Reinicia el backend
+
+Producción:
+   docker-compose -f docker-compose.prod.yml up -d
+
+Gestión de imágenes:
+   docker images                        # Lista imágenes locales
+   docker rmi <image-id>                # Elimina una imagen
+   docker system prune -a               # Limpia imágenes y contenedores no usados
+
+
+================================================================================
+RESUMEN FINAL
+================================================================================
+
+El proyecto e-commerce implementa una arquitectura completa de Spring Boot con:
+
+1. CONFIGURACIÓN: Maven, Spring Boot 3.2.5, Java 17, PostgreSQL, Lombok
+2. API REST: Endpoints RESTful para Products, Categories, Users, Cart, Auth
+3. ARQUITECTURA EN CAPAS:
+   - Controllers: Manejan requests HTTP
+   - Services: Lógica de negocio
+   - Repositories: Acceso a datos con JPA
+   - Entities: Modelo de dominio
+   - DTOs: Transferencia de datos
+   - Exception Handlers: Manejo centralizado de errores
+4. PERSISTENCIA: JPA/Hibernate con relaciones @ManyToOne, @OneToMany
+5. SEGURIDAD: Spring Security + JWT + BCrypt + CORS
+6. CONTENEDORIZACIÓN: Docker + docker-compose + Docker Hub
+
+Entidades principales:
+- User (usuarios con roles)
+- Product (productos)
+- Category (categorías)
+- CartItem (items del carrito)
+
+Relaciones:
+- Product -> Category (ManyToOne)
+- Category -> Products (OneToMany)
+- User -> CartItems (OneToMany)
+- CartItem -> User y Product (ManyToOne)
+
+================================================================================
+FIN DE LA GUÍA
+================================================================================
