@@ -39,7 +39,8 @@ public class AuthService {
 
         User user = convertToEntity(registerDTO);
         user.setPassword(passwordEncoder.encode(registerDTO.getPassword()));
-        user.setRole("user");
+        // Normalizar rol a mayúsculas para consistencia con el resto del sistema
+        user.setRole("USER");
         user.setCreatedAt(LocalDateTime.now());
         user.setIsActive(true);
 

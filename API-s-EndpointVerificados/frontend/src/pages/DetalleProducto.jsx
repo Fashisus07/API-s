@@ -35,9 +35,31 @@ function DetalleProducto() {
           
           // Obtener todos los productos para encontrar relacionados
           const allProducts = await getProducts();
+          // Preferir cotejar por categoryId si está disponible, si no usar categoryName (insensible a mayúsculas)
           const related = allProducts
-            .filter(p => p.category === foundProduct.category && p.id !== foundProduct.id)
+            .filter(p => {
+              if (p.id === foundProduct.id) return false;
+              // Excluir productos sin stock
+              if ((p.stock ?? 0) <= 0) return false;
+              if (p.categoryId && foundProduct.categoryId) {
+                return p.categoryId === foundProduct.categoryId;
+              }
+              if (p.categoryName && foundProduct.categoryName) {
+                return p.categoryName.toString().toLowerCase().trim() === foundProduct.categoryName.toString().toLowerCase().trim();
+              }
+              // Fallback: si existe campo `category` antiguo, compararlo tambien
+              if (p.category && foundProduct.category) {
+                return p.category.toString().toLowerCase().trim() === foundProduct.category.toString().toLowerCase().trim();
+              }
+              return false;
+            })
             .slice(0, 4);
+
+          // Si el producto actual no tiene stock, redirigir a la lista (desaparece)
+          if ((foundProduct.stock ?? 0) <= 0) {
+            navigate('/productos');
+            return;
+          }
           console.log("Related products:", related);
           setRelatedProducts(related);
           setError("");
@@ -54,6 +76,41 @@ function DetalleProducto() {
     };
 
     loadProduct(); // Ejecutar función de carga
+
+    // Suscribir a eventos de actualización globales (ej. checkout que reduce stock)
+    const onProductsUpdated = async () => {
+      try {
+        const refreshed = await getProductById(parseInt(id));
+        if (!refreshed) {
+          navigate('/productos');
+          return;
+        }
+        // Si el producto quedó sin stock, redirigir
+        if ((refreshed.stock ?? 0) <= 0) {
+          navigate('/productos');
+          return;
+        }
+        // Actualizar estado y relacionados si cambió
+        setProduct(refreshed);
+        const allProducts = await getProducts();
+        const related = allProducts
+          .filter(p => {
+            if (p.id === refreshed.id) return false;
+            if ((p.stock ?? 0) <= 0) return false;
+            if (p.categoryId && refreshed.categoryId) return p.categoryId === refreshed.categoryId;
+            if (p.categoryName && refreshed.categoryName) return p.categoryName.toString().toLowerCase().trim() === refreshed.categoryName.toString().toLowerCase().trim();
+            if (p.category && refreshed.category) return p.category.toString().toLowerCase().trim() === refreshed.category.toString().toLowerCase().trim();
+            return false;
+          })
+          .slice(0,4);
+        setRelatedProducts(related);
+      } catch (err) {
+        console.warn('Error al refrescar producto tras evento productsUpdated', err);
+      }
+    };
+
+    window.addEventListener('productsUpdated', onProductsUpdated);
+    return () => window.removeEventListener('productsUpdated', onProductsUpdated);
   }, [id]);
 
   const handleAddToCart = async () => {
@@ -222,7 +279,7 @@ function DetalleProducto() {
                 <div className="space-y-2 text-sm">
                   <div className="flex justify-between">
                     <span className="text-gray-600">Categoría:</span>
-                    <span className="font-medium">{product.category}</span>
+                    <span className="font-medium">{product.categoryName || product.category}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-600">Stock disponible:</span>

@@ -130,15 +130,20 @@ function Header() {
           <div className="flex items-center space-x-8 text-sm text-gray-600">
             <span className="font-semibold text-primary">Categorías:</span>
             {/* Enlaces a diferentes categorías de productos - cargadas dinámicamente */}
-            {categories.map((category) => (
-              <Link 
-                key={category.id} 
-                to={`/productos?category=${encodeURIComponent(category.name.toLowerCase())}`} 
-                className="hover:text-primary transition"
-              >
-                {category.name}
-              </Link>
-            ))}
+            {categories.map((category) => {
+              const slugify = (str) => {
+                return str?.toString()?.trim()?.normalize('NFD')?.replace(/\p{Diacritic}/gu, '')?.toLowerCase()?.replace(/\s+/g, '-')?.replace(/[^a-z0-9\-]/g, '') || '';
+              };
+              return (
+                <Link 
+                  key={category.id} 
+                  to={`/productos?category=${slugify(category.name)}`} 
+                  className="hover:text-primary transition"
+                >
+                  {category.name}
+                </Link>
+              )
+            })}
             {/* Enlace para ver todas las categorías */}
             <Link to="/productos" className="text-primary hover:text-primary-dark transition font-medium">Ver todas →</Link>
           </div>

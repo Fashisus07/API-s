@@ -1,6 +1,7 @@
 // Importar React y hooks necesarios para el componente de checkout
 import React, { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom"; // Hooks para navegación
+import { checkout as apiCheckout } from "../services/apiService";
 import { useAuth } from "../context/AuthContext"; // Contexto de autenticación
 import { useCart } from "../context/CartContext"; // Contexto del carrito
 
@@ -118,42 +119,34 @@ function Checkout() {
     setProcessing(true);
 
     try {
-      await new Promise(resolve => setTimeout(resolve, 3000));
+      // Si no está autenticado, redirigir a login
+      if (!user || !user.email) {
+        setErrors({ submit: "Debes iniciar sesión para completar la compra" });
+        setProcessing(false);
+        navigate('/login');
+        return;
+      }
 
+      // Llamar al endpoint del backend que procesa el checkout y actualiza stock
+      const response = await apiCheckout();
+
+      // Si la respuesta fue exitosa, backend se encargó de decrementar stock y limpiar el carrito en BD
       const newOrderId = `ORD-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
       setOrderId(newOrderId);
 
-      const order = {
-        id: newOrderId,
-        userId: user.email,
-        items: cartItems,
-        total: getTotalWithShipping(),
-        shippingPrice: getShippingPrice(),
-        subtotal: getTotalPrice(),
-        customerInfo: {
-          firstName: formData.firstName,
-          lastName: formData.lastName,
-          email: formData.email,
-          phone: formData.phone,
-          address: formData.address,
-          city: formData.city,
-          postalCode: formData.postalCode,
-          province: formData.province
-        },
-        paymentMethod: formData.paymentMethod,
-        shippingMethod: formData.shippingMethod,
-        status: "confirmed",
-        createdAt: new Date().toISOString()
-      };
-
-      const existingOrders = JSON.parse(localStorage.getItem(`orders_${user.email}`) || "[]");
-      existingOrders.push(order);
-      localStorage.setItem(`orders_${user.email}`, JSON.stringify(existingOrders));
-
+      // Limpiar carrito local y marcar orden completada
       clearCart();
+
+      // Forzar refresh global de productos (para que desaparezcan los que quedaron sin stock)
+      try {
+        window.dispatchEvent(new CustomEvent('productsUpdated'));
+      } catch (e) {
+        console.warn('No se pudo dispatch productsUpdated event', e);
+      }
       setOrderComplete(true);
     } catch (error) {
-      setErrors({ submit: "Error al procesar el pago. Inténtalo nuevamente." });
+      console.error('Error en checkout:', error);
+      setErrors({ submit: error?.message || "Error al procesar el pago. Inténtalo nuevamente." });
     } finally {
       setProcessing(false);
     }
@@ -615,12 +608,7 @@ function Checkout() {
                 </div>
               </div>
 
-              <div className="mt-6 p-4 bg-green-50 rounded-lg">
-                <h3 className="font-semibold text-green-800 mb-2">🔒 Compra Segura</h3>
-                <p className="text-sm text-green-700">
-                  Tus datos están protegidos con encriptación SSL.
-                </p>
-              </div>
+              {/* 'Compra Segura' removed as requested */}
             </div>
           </div>
         </div>

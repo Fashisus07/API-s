@@ -7,6 +7,8 @@ import com.ecommerce.repository.CategoryRepository;
 import com.ecommerce.repository.ProductRepository;
 import com.ecommerce.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
@@ -18,6 +20,8 @@ import java.time.format.DateTimeFormatter;
 public class DataLoader implements CommandLineRunner {
 
     private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+
+    private static final Logger logger = LoggerFactory.getLogger(DataLoader.class);
 
     @Autowired
     private ProductRepository productRepository;
@@ -60,8 +64,7 @@ public class DataLoader implements CommandLineRunner {
         for (Category category : categories) {
             categoryRepository.save(category);
         }
-        
-        System.out.println("Categorías cargadas exitosamente");
+        logger.info("Categorías cargadas exitosamente");
     }
 
     private void loadProducts() {
@@ -78,6 +81,21 @@ public class DataLoader implements CommandLineRunner {
                 .filter(c -> c.getName().equals("Libros")).findFirst().orElse(null);
         Category belleza = categoryRepository.findAll().stream()
                 .filter(c -> c.getName().equals("Belleza")).findFirst().orElse(null);
+
+        // Validar que las categorías requeridas existan antes de crear productos
+        StringBuilder missing = new StringBuilder();
+        if (electronicos == null) missing.append("Electrónicos, ");
+        if (ropa == null) missing.append("Ropa, ");
+        if (hogar == null) missing.append("Hogar, ");
+        if (deportes == null) missing.append("Deportes, ");
+        if (libros == null) missing.append("Libros, ");
+        if (belleza == null) missing.append("Belleza, ");
+
+        if (missing.length() > 0) {
+            String msg = "No se encontraron las categorías necesarias: " + missing.toString();
+            logger.error(msg);
+            throw new IllegalStateException(msg);
+        }
 
         Product[] products = {
             Product.builder().name("iPhone 14 Pro").description("El iPhone más avanzado con chip A16 Bionic, sistema de cámaras Pro y pantalla Super Retina XDR de 6.1 pulgadas.").price(999999.0).stock(15).category(electronicos).imageUrl("https://picsum.photos/300/200?random=1").build(),
@@ -105,8 +123,7 @@ public class DataLoader implements CommandLineRunner {
         for (Product product : products) {
             productRepository.save(product);
         }
-        
-        System.out.println("Productos cargados exitosamente");
+        logger.info("Productos cargados exitosamente");
     }
 
 
@@ -122,8 +139,7 @@ public class DataLoader implements CommandLineRunner {
         for (User user : users) {
             userRepository.save(user);
         }
-        
-        System.out.println("Usuarios cargados exitosamente");
+        logger.info("Usuarios cargados exitosamente");
     }
 
 }

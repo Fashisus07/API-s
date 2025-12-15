@@ -192,6 +192,8 @@ export const addToCart = async (productId, quantity = 1) => {
 // Actualizar cantidad en el carrito
 export const updateCartItem = async (productId, quantity) => {
   try {
+    // NOTE: backend expects PUT /cart/update/{itemId} with body { quantity }
+    // This helper will be deprecated in favor of updateCartItemById
     const response = await fetch(`${API_BASE_URL}/cart/update`, {
       method: 'PUT',
       headers: getAuthHeaders(),
@@ -206,6 +208,67 @@ export const updateCartItem = async (productId, quantity) => {
     return await response.json();
   } catch (error) {
     console.error('Error updating cart:', error);
+    throw error;
+  }
+};
+
+// Actualiza la cantidad de un item del carrito usando su itemId (recommended)
+export const updateCartItemById = async (itemId, quantity) => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/cart/update/${itemId}`, {
+      method: 'PUT',
+      headers: getAuthHeaders(),
+      body: JSON.stringify({ quantity }),
+    });
+
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({ message: 'Error al actualizar item' }));
+      throw new Error(error.message || 'Error al actualizar item');
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('Error updating cart item by id:', error);
+    throw error;
+  }
+};
+
+// Remueve un item del carrito por su itemId
+export const removeCartItemById = async (itemId) => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/cart/remove/${itemId}`, {
+      method: 'DELETE',
+      headers: getAuthHeaders(),
+    });
+
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({ message: 'Error al remover item' }));
+      throw new Error(error.message || 'Error al remover item');
+    }
+
+    return true;
+  } catch (error) {
+    console.error('Error removing cart item by id:', error);
+    throw error;
+  }
+};
+
+// Vacía el carrito del usuario en el backend
+export const clearCartBackend = async () => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/cart/clear`, {
+      method: 'DELETE',
+      headers: getAuthHeaders(),
+    });
+
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({ message: 'Error al vaciar carrito' }));
+      throw new Error(error.message || 'Error al vaciar carrito');
+    }
+
+    return true;
+  } catch (error) {
+    console.error('Error clearing cart in backend:', error);
     throw error;
   }
 };

@@ -20,8 +20,8 @@ function Inicio() {
         setLoading(true);
         const productsData = await getProducts();
         
-        // Seleccionar los primeros 8 productos como destacados
-        const featured = productsData.slice(0, 8);
+        // Seleccionar los primeros 8 productos con stock disponible como destacados
+        const featured = productsData.filter(p => (p.stock ?? 0) > 0).slice(0, 8);
         setFeaturedProducts(featured);
         console.log("Inicio - Productos cargados desde backend:", productsData.length);
       } catch (error) {
@@ -33,6 +33,13 @@ function Inicio() {
     };
 
     loadProducts();
+    // Escuchar eventos que indiquen cambio en productos (ej. checkout)
+    const onProductsUpdated = () => {
+      console.log('Evento productsUpdated recibido en Inicio — recargando destacados');
+      loadProducts();
+    };
+    window.addEventListener('productsUpdated', onProductsUpdated);
+    return () => window.removeEventListener('productsUpdated', onProductsUpdated);
   }, []);
 
   // useEffect para cargar categorías desde el backend
@@ -42,6 +49,11 @@ function Inicio() {
         const categoriesData = await getCategories();
         
         // Mapear categorías del backend con íconos y colores
+        // Función local para generar slugs de categoría (coincide con lo que usa Productos para filtrar)
+        const slugify = (str) => {
+          return str?.toString()?.trim()?.normalize('NFD')?.replace(/\p{Diacritic}/gu, '')?.toLowerCase()?.replace(/\s+/g, '-')?.replace(/[^a-z0-9\-]/g, '') || '';
+        };
+
         const categoriesWithIcons = categoriesData.map((category, index) => {
           // Asignar ícono según el nombre de la categoría
           const iconMap = {
@@ -107,7 +119,8 @@ function Inicio() {
             name: category.name,
             icon: icon,
             color: color,
-            link: `/productos?category=${category.id}`
+            // usamos slug (nombre normalizado) para el parámetro 'category' que luego filtra Productos
+            link: `/productos?category=${slugify(category.name)}`
           };
         });
         

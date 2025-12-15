@@ -10,6 +10,8 @@ import com.ecommerce.repository.CategoryRepository;
 import com.ecommerce.repository.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
@@ -24,6 +26,8 @@ public class ProductService {
     @Autowired
     private CategoryRepository categoryRepository;
 
+    private static final Logger logger = LoggerFactory.getLogger(ProductService.class);
+
     public List<ProductDTO> getAllProducts() {
         return productRepository.findAll().stream()
                 .map(this::convertToDTO)
@@ -37,9 +41,16 @@ public class ProductService {
     }
 
     public ProductDTO createProduct(CreateProductDTO createProductDTO) {
+        logger.info("Creating product with data: {}", createProductDTO);
         Product product = convertToEntity(createProductDTO);
-        Product savedProduct = productRepository.save(product);
-        return convertToDTO(savedProduct);
+        try {
+            Product savedProduct = productRepository.save(product);
+            logger.info("Product created with id={} name={}", savedProduct.getId(), savedProduct.getName());
+            return convertToDTO(savedProduct);
+        } catch (Exception ex) {
+            logger.error("Error saving product: {}", ex.getMessage(), ex);
+            throw ex;
+        }
     }
 
     public ProductDTO updateProduct(Long id, UpdateProductDTO updateProductDTO) {

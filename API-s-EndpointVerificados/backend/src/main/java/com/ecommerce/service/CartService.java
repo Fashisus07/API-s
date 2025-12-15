@@ -116,6 +116,7 @@ public class CartService {
             throw new BadRequestException("El carrito está vacío");
         }
 
+        // Verificar stock antes de procesar la venta
         for (CartItem item : items) {
             if (item.getProduct().getStock() < item.getQuantity()) {
                 throw new BadRequestException("Stock insuficiente para " + item.getProduct().getName());
@@ -123,18 +124,30 @@ public class CartService {
         }
 
         double total = 0;
+
+        // Actualizar stock de cada producto y guardarlo
         for (CartItem item : items) {
             Product product = item.getProduct();
-            product.setStock(product.getStock() - item.getQuantity());
-            productRepository.save(product);
+            int nuevoStock = product.getStock() - item.getQuantity();
+
+            if (nuevoStock < 0) {
+                throw new BadRequestException("Stock insuficiente para " + product.getName());
+            }
+
+            product.setStock(nuevoStock);
+            productRepository.saveAndFlush(product); // <-- forzamos actualización inmediata en BD
+
             total += product.getPrice() * item.getQuantity();
         }
 
-        int itemsCount = items.size();
+        // Limpiar carrito una vez confirmada la venta
         cartItemRepository.deleteByUser(user);
 
+        // Retornar información de la compra
+        int itemsCount = items.size();
         return new CheckoutResponseDTO("Compra realizada exitosamente", total, itemsCount);
     }
+
 
     private User getUserByEmail(String email) {
         return userRepository.findByEmail(email)

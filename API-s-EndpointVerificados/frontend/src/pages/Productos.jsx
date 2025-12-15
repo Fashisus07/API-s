@@ -97,8 +97,13 @@ function Productos() {
 
   // Función para filtrar productos basado en parámetros de búsqueda y categoría
   const filterProducts = (productList = allProducts) => {
+    // Normalizar parámetros usando slugify para que coincidan con los nombres normalizados de categorías
+    const slugify = (str) => {
+      return str?.toString()?.trim()?.normalize('NFD')?.replace(/\p{Diacritic}/gu, '')?.toLowerCase()?.replace(/\s+/g, '-')?.replace(/[^a-z0-9\-]/g, '') || '';
+    };
+
     const searchTerm = searchParams.get('search')?.toLowerCase() || ''; // Obtener término de búsqueda de la URL
-    const category = searchParams.get('category')?.toLowerCase() || ''; // Obtener categoría de la URL
+    const category = slugify(searchParams.get('category') || ''); // Obtener categoría (slug) de la URL
 
     let filtered = productList; // Inicializar con todos los productos
 
@@ -114,10 +119,13 @@ function Productos() {
     // Filtrar por categoría (usando categoryName del producto)
     if (category) {
       filtered = filtered.filter(product => {
-        const productCategory = product.categoryName?.toLowerCase() || '';
+        const productCategory = slugify(product.categoryName || '');
         return productCategory === category;
       });
     }
+
+    // Excluir productos sin stock (stock <= 0)
+    filtered = filtered.filter(product => (product.stock ?? 0) > 0);
 
     setProducts(filtered);
   };
@@ -137,6 +145,17 @@ function Productos() {
     console.log("useEffect ejecutándose - cargando productos y categorías desde backend...");
     fetchProducts();
     fetchCategories();
+  }, []);
+
+  // Escuchar eventos externos que indiquen que los productos cambiaron (ej. checkout que disminuye stock)
+  useEffect(() => {
+    const onProductsUpdated = () => {
+      console.log('Evento productsUpdated recibido — refrescando productos');
+      fetchProducts(true);
+      fetchCategories();
+    };
+    window.addEventListener('productsUpdated', onProductsUpdated);
+    return () => window.removeEventListener('productsUpdated', onProductsUpdated);
   }, []);
 
   useEffect(() => {
